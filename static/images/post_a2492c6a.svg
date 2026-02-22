@@ -1,0 +1,277 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080">
+  <defs>
+    <!-- Background gradients -->
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07152A"/>
+      <stop offset="0.45" stop-color="#182A6B"/>
+      <stop offset="1" stop-color="#0A6A7A"/>
+    </linearGradient>
+
+    <radialGradient id="glow" cx="30%" cy="20%" r="75%">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.55"/>
+      <stop offset="0.45" stop-color="#22D3EE" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1730" stop-opacity="0.84"/>
+      <stop offset="1" stop-color="#081024" stop-opacity="0.72"/>
+    </linearGradient>
+
+    <linearGradient id="strokeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#A78BFA" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#22C55E" stop-opacity="0.25"/>
+    </linearGradient>
+
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#FF2D55"/>
+      <stop offset="1" stop-color="#FF4D2D"/>
+    </linearGradient>
+
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000" flood-opacity="0.35"/>
+    </filter>
+
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+
+    <!-- Typography -->
+    <style>
+      .sans{font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif;}
+      .h1{font-weight: 800; letter-spacing: -0.02em;}
+      .h2{font-weight: 650; letter-spacing: -0.01em;}
+      .sub{font-weight: 500; opacity: 0.9;}
+      .cap{font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;}
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <rect width="1080" height="1080" fill="url(#glow)"/>
+
+  <!-- Subtle grid -->
+  <g opacity="0.16">
+    <path d="M80 160 H1000" stroke="#A5B4FC" stroke-opacity="0.35" stroke-width="1"/>
+    <path d="M80 260 H1000" stroke="#A5B4FC" stroke-opacity="0.25" stroke-width="1"/>
+    <path d="M80 360 H1000" stroke="#A5B4FC" stroke-opacity="0.2" stroke-width="1"/>
+    <path d="M80 460 H1000" stroke="#A5B4FC" stroke-opacity="0.18" stroke-width="1"/>
+    <path d="M80 560 H1000" stroke="#A5B4FC" stroke-opacity="0.18" stroke-width="1"/>
+    <path d="M80 660 H1000" stroke="#A5B4FC" stroke-opacity="0.18" stroke-width="1"/>
+    <path d="M80 760 H1000" stroke="#A5B4FC" stroke-opacity="0.18" stroke-width="1"/>
+    <path d="M80 860 H1000" stroke="#A5B4FC" stroke-opacity="0.18" stroke-width="1"/>
+
+    <path d="M80 160 V980" stroke="#A5B4FC" stroke-opacity="0.18" stroke-width="1"/>
+    <path d="M264 160 V980" stroke="#A5B4FC" stroke-opacity="0.14" stroke-width="1"/>
+    <path d="M448 160 V980" stroke="#A5B4FC" stroke-opacity="0.14" stroke-width="1"/>
+    <path d="M632 160 V980" stroke="#A5B4FC" stroke-opacity="0.14" stroke-width="1"/>
+    <path d="M816 160 V980" stroke="#A5B4FC" stroke-opacity="0.14" stroke-width="1"/>
+    <path d="M1000 160 V980" stroke="#A5B4FC" stroke-opacity="0.18" stroke-width="1"/>
+  </g>
+
+  <!-- Top accent bar -->
+  <g>
+    <rect x="80" y="96" width="920" height="10" rx="5" fill="url(#accent)"/>
+    <circle cx="980" cy="101" r="14" fill="url(#accent)" opacity="0.85"/>
+    <circle cx="950" cy="101" r="8" fill="#22D3EE" opacity="0.7"/>
+  </g>
+
+  <!-- Header -->
+  <g class="sans">
+    <text x="80" y="155" font-size="54" fill="#EAF2FF" class="h1">5-Part Framework</text>
+    <text x="80" y="196" font-size="24" fill="#C7D2FE" class="sub">Footprint → Offer → Pre-Order Pipeline → Surround Sound → Build + Drops</text>
+  </g>
+
+  <!-- Main panel container -->
+  <g filter="url(#shadow)">
+    <rect x="60" y="230" width="960" height="770" rx="28" fill="url(#panel)" stroke="url(#strokeGrad)" stroke-width="1.5" opacity="0.98"/>
+  </g>
+
+  <!-- Column geometry -->
+  <!-- Inner layout constants: left=96, top=278, width=888, height=674, col= (888-4*18)/5 = 163.2 -->
+  <!-- We'll use integer-friendly: gaps=18, colW=163 -->
+
+  <!-- Decorative corner accents -->
+  <g opacity="0.9">
+    <path d="M86 254 h70" stroke="url(#accent)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M86 254 v70" stroke="url(#accent)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M994 976 h-70" stroke="url(#accent)" stroke-width="6" stroke-linecap="round"/>
+    <path d="M994 976 v-70" stroke="url(#accent)" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- Columns -->
+  <g class="sans">
+    <!-- Helper: functionally five cards -->
+
+    <!-- Column 1 -->
+    <g transform="translate(96,278)">
+      <rect width="163" height="674" rx="18" fill="#0B1E3B" opacity="0.72" stroke="#2DD4BF" stroke-opacity="0.22"/>
+      <rect x="0" y="0" width="163" height="6" rx="3" fill="url(#accent)"/>
+      <text x="18" y="58" font-size="44" fill="#FFFFFF" class="h1">1</text>
+      <text x="18" y="92" font-size="16" fill="#FF8AA0" class="cap">Pillar</text>
+      <text x="18" y="132" font-size="26" fill="#EAF2FF" class="h2">Footprint</text>
+      <text x="18" y="166" font-size="16" fill="#C7D2FE" class="sub">Where you live online.</text>
+
+      <!-- Icon: Map pin + map -->
+      <g transform="translate(18,210)">
+        <rect x="0" y="0" width="127" height="120" rx="16" fill="#071427" stroke="#22D3EE" stroke-opacity="0.25"/>
+        <path d="M24 26 l22 -10 l30 12 l25 -10 v72 l-25 10 l-30 -12 l-22 10 z" fill="#0EA5E9" opacity="0.18" stroke="#93C5FD" stroke-opacity="0.45" stroke-width="2"/>
+        <path d="M46 16 v76" stroke="#93C5FD" stroke-opacity="0.5" stroke-width="2"/>
+        <path d="M76 28 v76" stroke="#93C5FD" stroke-opacity="0.35" stroke-width="2"/>
+        <path d="M63 44 c12 0 22 9 22 21 c0 16-22 40-22 40 s-22-24-22-40 c0-12 10-21 22-21z" fill="#FF2D55" opacity="0.92"/>
+        <circle cx="63" cy="65" r="6" fill="#071427"/>
+      </g>
+
+      <!-- Bottom mini bullets -->
+      <g transform="translate(18,360)" opacity="0.95">
+        <rect x="0" y="0" width="127" height="1.5" fill="#A5B4FC" opacity="0.25"/>
+        <text x="0" y="34" font-size="15" fill="#DCE7FF" class="h2">Assets</text>
+        <text x="0" y="60" font-size="14" fill="#C7D2FE" class="sub">Profile, site,</text>
+        <text x="0" y="82" font-size="14" fill="#C7D2FE" class="sub">proof, links</text>
+      </g>
+    </g>
+
+    <!-- Column 2 -->
+    <g transform="translate(277,278)">
+      <rect width="163" height="674" rx="18" fill="#0B1E3B" opacity="0.72" stroke="#A78BFA" stroke-opacity="0.22"/>
+      <rect x="0" y="0" width="163" height="6" rx="3" fill="url(#accent)"/>
+      <text x="18" y="58" font-size="44" fill="#FFFFFF" class="h1">2</text>
+      <text x="18" y="92" font-size="16" fill="#FF8AA0" class="cap">Pillar</text>
+      <text x="18" y="132" font-size="26" fill="#EAF2FF" class="h2">Offer</text>
+      <text x="18" y="166" font-size="16" fill="#C7D2FE" class="sub">What you sell + why.</text>
+
+      <!-- Icon: Price tag -->
+      <g transform="translate(18,210)">
+        <rect x="0" y="0" width="127" height="120" rx="16" fill="#071427" stroke="#A78BFA" stroke-opacity="0.25"/>
+        <path d="M24 28 h46 l33 33 v31 l-35 20 l-44 -44 z" fill="#A78BFA" opacity="0.18" stroke="#DDD6FE" stroke-opacity="0.55" stroke-width="2"/>
+        <circle cx="52" cy="48" r="6.5" fill="#FF2D55"/>
+        <path d="M70 66 h20" stroke="#EAF2FF" stroke-opacity="0.8" stroke-width="2" stroke-linecap="round"/>
+        <path d="M70 80 h26" stroke="#EAF2FF" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round"/>
+        <path d="M70 94 h16" stroke="#EAF2FF" stroke-opacity="0.4" stroke-width="2" stroke-linecap="round"/>
+      </g>
+
+      <g transform="translate(18,360)" opacity="0.95">
+        <rect x="0" y="0" width="127" height="1.5" fill="#A5B4FC" opacity="0.25"/>
+        <text x="0" y="34" font-size="15" fill="#DCE7FF" class="h2">Clarity</text>
+        <text x="0" y="60" font-size="14" fill="#C7D2FE" class="sub">Promise,</text>
+        <text x="0" y="82" font-size="14" fill="#C7D2FE" class="sub">price, proof</text>
+      </g>
+    </g>
+
+    <!-- Column 3 -->
+    <g transform="translate(458,278)">
+      <rect width="163" height="674" rx="18" fill="#0B1E3B" opacity="0.72" stroke="#22D3EE" stroke-opacity="0.22"/>
+      <rect x="0" y="0" width="163" height="6" rx="3" fill="url(#accent)"/>
+      <text x="18" y="58" font-size="44" fill="#FFFFFF" class="h1">3</text>
+      <text x="18" y="92" font-size="16" fill="#FF8AA0" class="cap">Pillar</text>
+      <text x="18" y="132" font-size="26" fill="#EAF2FF" class="h2">Pre-Order</text>
+      <text x="18" y="160" font-size="26" fill="#EAF2FF" class="h2">Pipeline</text>
+      <text x="18" y="194" font-size="16" fill="#C7D2FE" class="sub">Demand before delivery.</text>
+
+      <!-- Icon: Pipeline / funnel -->
+      <g transform="translate(18,236)">
+        <rect x="0" y="0" width="127" height="120" rx="16" fill="#071427" stroke="#22D3EE" stroke-opacity="0.25"/>
+        <path d="M24 28 h79" stroke="#EAF2FF" stroke-opacity="0.35" stroke-width="3" stroke-linecap="round"/>
+        <path d="M30 44 h67" stroke="#EAF2FF" stroke-opacity="0.22" stroke-width="3" stroke-linecap="round"/>
+        <path d="M36 60 h55" stroke="#EAF2FF" stroke-opacity="0.18" stroke-width="3" stroke-linecap="round"/>
+        <path d="M44 76 h39" stroke="#EAF2FF" stroke-opacity="0.14" stroke-width="3" stroke-linecap="round"/>
+        <path d="M58 92 h11" stroke="#EAF2FF" stroke-opacity="0.14" stroke-width="3" stroke-linecap="round"/>
+        <path d="M28 36 C48 28, 60 28, 100 46" fill="none" stroke="#FF2D55" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="100" cy="46" r="5.5" fill="#FF2D55"/>
+        <circle cx="28" cy="36" r="5.5" fill="#22D3EE"/>
+        <path d="M28 36 L40 36" stroke="#22D3EE" stroke-width="3" stroke-linecap="round"/>
+      </g>
+
+      <g transform="translate(18,380)" opacity="0.95">
+        <rect x="0" y="0" width="127" height="1.5" fill="#A5B4FC" opacity="0.25"/>
+        <text x="0" y="34" font-size="15" fill="#DCE7FF" class="h2">System</text>
+        <text x="0" y="60" font-size="14" fill="#C7D2FE" class="sub">Lead →</text>
+        <text x="0" y="82" font-size="14" fill="#C7D2FE" class="sub">intent → order</text>
+      </g>
+    </g>
+
+    <!-- Column 4 -->
+    <g transform="translate(639,278)">
+      <rect width="163" height="674" rx="18" fill="#0B1E3B" opacity="0.72" stroke="#60A5FA" stroke-opacity="0.22"/>
+      <rect x="0" y="0" width="163" height="6" rx="3" fill="url(#accent)"/>
+      <text x="18" y="58" font-size="44" fill="#FFFFFF" class="h1">4</text>
+      <text x="18" y="92" font-size="16" fill="#FF8AA0" class="cap">Pillar</text>
+      <text x="18" y="132" font-size="26" fill="#EAF2FF" class="h2">Surround</text>
+      <text x="18" y="160" font-size="26" fill="#EAF2FF" class="h2">Sound</text>
+      <text x="18" y="194" font-size="16" fill="#C7D2FE" class="sub">Omnipresent messaging.</text>
+
+      <!-- Icon: Megaphone -->
+      <g transform="translate(18,236)">
+        <rect x="0" y="0" width="127" height="120" rx="16" fill="#071427" stroke="#60A5FA" stroke-opacity="0.25"/>
+        <path d="M28 70 L64 52 L64 88 L28 70 Z" fill="#60A5FA" opacity="0.25" stroke="#BFDBFE" stroke-opacity="0.65" stroke-width="2"/>
+        <path d="M64 52 L98 40 V100 L64 88 Z" fill="#FF2D55" opacity="0.18" stroke="#FF8AA0" stroke-opacity="0.7" stroke-width="2"/>
+        <path d="M38 72 L44 100" stroke="#EAF2FF" stroke-opacity="0.55" stroke-width="4" stroke-linecap="round"/>
+        <path d="M98 56 C110 62, 110 78, 98 84" fill="none" stroke="#EAF2FF" stroke-opacity="0.5" stroke-width="3" stroke-linecap="round"/>
+        <path d="M98 48 C116 58, 116 82, 98 92" fill="none" stroke="#EAF2FF" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round"/>
+      </g>
+
+      <g transform="translate(18,380)" opacity="0.95">
+        <rect x="0" y="0" width="127" height="1.5" fill="#A5B4FC" opacity="0.25"/>
+        <text x="0" y="34" font-size="15" fill="#DCE7FF" class="h2">Content</text>
+        <text x="0" y="60" font-size="14" fill="#C7D2FE" class="sub">Signal,</text>
+        <text x="0" y="82" font-size="14" fill="#C7D2FE" class="sub">proof, story</text>
+      </g>
+    </g>
+
+    <!-- Column 5 -->
+    <g transform="translate(820,278)">
+      <rect width="163" height="674" rx="18" fill="#0B1E3B" opacity="0.72" stroke="#34D399" stroke-opacity="0.22"/>
+      <rect x="0" y="0" width="163" height="6" rx="3" fill="url(#accent)"/>
+      <text x="18" y="58" font-size="44" fill="#FFFFFF" class="h1">5</text>
+      <text x="18" y="92" font-size="16" fill="#FF8AA0" class="cap">Pillar</text>
+      <text x="18" y="132" font-size="26" fill="#EAF2FF" class="h2">Build +</text>
+      <text x="18" y="160" font-size="26" fill="#EAF2FF" class="h2">Drops</text>
+      <text x="18" y="194" font-size="16" fill="#C7D2FE" class="sub">Ship in sprints.</text>
+
+      <!-- Icon: Cable + house -->
+      <g transform="translate(18,236)">
+        <rect x="0" y="0" width="127" height="120" rx="16" fill="#071427" stroke="#34D399" stroke-opacity="0.25"/>
+        <!-- House -->
+        <path d="M30 70 L64 44 L98 70 V104 H30 Z" fill="#34D399" opacity="0.16" stroke="#BBF7D0" stroke-opacity="0.6" stroke-width="2"/>
+        <rect x="58" y="82" width="12" height="22" rx="2" fill="#EAF2FF" opacity="0.65"/>
+        <!-- Cable -->
+        <path d="M24 40 C40 40, 40 58, 56 58 C72 58, 72 38, 90 38" fill="none" stroke="#FF2D55" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="24" cy="40" r="6" fill="#FF2D55"/>
+        <rect x="88" y="32" width="18" height="12" rx="4" fill="#FF2D55" opacity="0.9"/>
+        <path d="M94 44 v8" stroke="#EAF2FF" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round"/>
+        <path d="M100 44 v8" stroke="#EAF2FF" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round"/>
+      </g>
+
+      <g transform="translate(18,380)" opacity="0.95">
+        <rect x="0" y="0" width="127" height="1.5" fill="#A5B4FC" opacity="0.25"/>
+        <text x="0" y="34" font-size="15" fill="#DCE7FF" class="h2">Momentum</text>
+        <text x="0" y="60" font-size="14" fill="#C7D2FE" class="sub">Build,</text>
+        <text x="0" y="82" font-size="14" fill="#C7D2FE" class="sub">launch, iterate</text>
+      </g>
+    </g>
+
+    <!-- Column separators (sharp grid feel) -->
+    <g opacity="0.35">
+      <path d="M268 278 V952" stroke="#EAF2FF" stroke-opacity="0.12" stroke-width="2"/>
+      <path d="M449 278 V952" stroke="#EAF2FF" stroke-opacity="0.12" stroke-width="2"/>
+      <path d="M630 278 V952" stroke="#EAF2FF" stroke-opacity="0.12" stroke-width="2"/>
+      <path d="M811 278 V952" stroke="#EAF2FF" stroke-opacity="0.12" stroke-width="2"/>
+    </g>
+  </g>
+
+  <!-- Bottom ribbon -->
+  <g class="sans" opacity="0.95">
+    <rect x="80" y="1006" width="920" height="44" rx="14" fill="#061126" stroke="#22D3EE" stroke-opacity="0.18"/>
+    <path d="M96 1028 h120" stroke="url(#accent)" stroke-width="6" stroke-linecap="round"/>
+    <text x="230" y="1036" font-size="18" fill="#C7D2FE" class="sub">Infographic layout: 5 numbered columns • sharp grid • red accent</text>
+  </g>
+
+  <!-- Floating geometric accents -->
+  <g opacity="0.55">
+    <circle cx="1010" cy="170" r="80" fill="#7C3AED" opacity="0.12" filter="url(#soft)"/>
+    <circle cx="170" cy="940" r="90" fill="#22D3EE" opacity="0.10" filter="url(#soft)"/>
+    <path d="M930 240 l34 0 l-17 30 z" fill="#FF2D55" opacity="0.65"/>
+    <path d="M124 226 l22 -18 l22 18 l-22 18 z" fill="#22D3EE" opacity="0.25"/>
+  </g>
+</svg>

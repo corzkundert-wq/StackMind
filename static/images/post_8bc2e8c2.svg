@@ -1,0 +1,178 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" role="img" aria-label="CTA card with three boxed options A B C">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1020"/>
+      <stop offset="0.45" stop-color="#1A1350"/>
+      <stop offset="1" stop-color="#073B4C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="15%" r="75%">
+      <stop offset="0" stop-color="#33F0D6" stop-opacity="0.35"/>
+      <stop offset="0.45" stop-color="#2F6BFF" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#33F0D6"/>
+      <stop offset="1" stop-color="#19B8FF"/>
+    </linearGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0F1633" stop-opacity="0.92"/>
+      <stop offset="1" stop-color="#0A0F24" stop-opacity="0.92"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="18" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 0.2  0 1 0 0 0.95  0 0 1 0 0.85  0 0 0 0.35 0" result="g"/>
+      <feMerge>
+        <feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <style>
+      .font { font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Noto Sans", "Liberation Sans", sans-serif; }
+      .headline { font-weight: 800; font-size: 72px; letter-spacing: -1px; }
+      .subtitle { font-weight: 500; font-size: 28px; opacity: 0.9; }
+      .boxTitle { font-weight: 800; font-size: 34px; letter-spacing: 0.2px; }
+      .boxDesc { font-weight: 500; font-size: 22px; opacity: 0.88; }
+      .badge { font-weight: 900; font-size: 26px; letter-spacing: 1px; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <rect width="1080" height="1080" fill="url(#glow)"/>
+
+  <!-- Geometric accents -->
+  <g opacity="0.55">
+    <path d="M920 120 C760 40, 620 60, 520 150 C450 212, 420 300, 440 380" fill="none" stroke="url(#teal)" stroke-width="3" opacity="0.55"/>
+    <path d="M160 910 C260 780, 420 740, 560 770 C720 804, 820 920, 930 1030" fill="none" stroke="url(#teal)" stroke-width="3" opacity="0.35"/>
+    <circle cx="910" cy="190" r="6" fill="#33F0D6" opacity="0.9"/>
+    <circle cx="870" cy="220" r="3" fill="#19B8FF" opacity="0.9"/>
+    <circle cx="190" cy="870" r="5" fill="#33F0D6" opacity="0.85"/>
+  </g>
+
+  <!-- Main container -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="80" width="940" height="920" rx="34" fill="url(#card)" stroke="rgba(255,255,255,0.10)" stroke-width="1.5"/>
+  </g>
+
+  <!-- Top accent bar -->
+  <g filter="url(#softGlow)">
+    <rect x="110" y="110" width="860" height="10" rx="5" fill="url(#teal)" opacity="0.95"/>
+  </g>
+
+  <!-- Headline & subtitle -->
+  <g class="font" fill="#FFFFFF">
+    <text x="120" y="220" class="headline">Choose A, B, or C</text>
+    <text x="120" y="268" class="subtitle" fill="rgba(255,255,255,0.86)">Pick the next step that fits your timeline.</text>
+  </g>
+
+  <!-- Three option boxes -->
+  <g class="font" transform="translate(120, 330)">
+
+    <!-- Box A -->
+    <g>
+      <rect x="0" y="0" width="840" height="190" rx="26" fill="rgba(255,255,255,0.04)" stroke="rgba(51,240,214,0.35)" stroke-width="1.5"/>
+      <rect x="0" y="0" width="10" height="190" rx="6" fill="url(#teal)" opacity="0.95"/>
+
+      <!-- A badge -->
+      <g transform="translate(32, 34)">
+        <rect x="0" y="0" width="54" height="54" rx="14" fill="rgba(51,240,214,0.14)" stroke="rgba(51,240,214,0.55)"/>
+        <text x="27" y="38" text-anchor="middle" class="badge" fill="#CFFFF8">A</text>
+      </g>
+
+      <!-- Icon: spreadsheet -->
+      <g transform="translate(115, 36)" fill="none" stroke="#CFFFF8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+        <rect x="0" y="0" width="60" height="60" rx="12" stroke="rgba(207,255,248,0.9)"/>
+        <path d="M16 18 H44"/>
+        <path d="M16 30 H44"/>
+        <path d="M16 42 H44"/>
+        <path d="M24 14 V46"/>
+        <path d="M36 14 V46"/>
+      </g>
+
+      <!-- Text -->
+      <text x="200" y="78" class="boxTitle" fill="#FFFFFF">A — Quick Spreadsheet</text>
+      <text x="200" y="116" class="boxDesc" fill="rgba(255,255,255,0.86)">Share your goals; we’ll map options &amp; ROI.</text>
+
+      <!-- CTA chip -->
+      <g transform="translate(620, 64)">
+        <rect x="0" y="0" width="188" height="54" rx="16" fill="rgba(51,240,214,0.12)" stroke="rgba(51,240,214,0.55)"/>
+        <text x="94" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#CFFFF8">Send details</text>
+      </g>
+    </g>
+
+    <!-- Box B -->
+    <g transform="translate(0, 220)">
+      <rect x="0" y="0" width="840" height="190" rx="26" fill="rgba(255,255,255,0.04)" stroke="rgba(25,184,255,0.34)" stroke-width="1.5"/>
+      <rect x="0" y="0" width="10" height="190" rx="6" fill="url(#teal)" opacity="0.95"/>
+
+      <!-- B badge -->
+      <g transform="translate(32, 34)">
+        <rect x="0" y="0" width="54" height="54" rx="14" fill="rgba(25,184,255,0.12)" stroke="rgba(25,184,255,0.55)"/>
+        <text x="27" y="38" text-anchor="middle" class="badge" fill="#D7F3FF">B</text>
+      </g>
+
+      <!-- Icon: calendar / 45-min -->
+      <g transform="translate(115, 36)" fill="none" stroke="#D7F3FF" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+        <rect x="0" y="8" width="60" height="52" rx="12" stroke="rgba(215,243,255,0.9)"/>
+        <path d="M16 6 V16"/>
+        <path d="M44 6 V16"/>
+        <path d="M10 24 H50"/>
+        <path d="M22 38 H38"/>
+        <path d="M30 32 V44"/>
+      </g>
+
+      <!-- Text -->
+      <text x="200" y="78" class="boxTitle" fill="#FFFFFF">B — 45‑min Call</text>
+      <text x="200" y="116" class="boxDesc" fill="rgba(255,255,255,0.86)">Align on scope, stakeholders, and success metrics.</text>
+
+      <!-- CTA chip -->
+      <g transform="translate(620, 64)">
+        <rect x="0" y="0" width="188" height="54" rx="16" fill="rgba(25,184,255,0.10)" stroke="rgba(25,184,255,0.55)"/>
+        <text x="94" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#D7F3FF">Book time</text>
+      </g>
+    </g>
+
+    <!-- Box C -->
+    <g transform="translate(0, 440)">
+      <rect x="0" y="0" width="840" height="190" rx="26" fill="rgba(255,255,255,0.04)" stroke="rgba(51,240,214,0.28)" stroke-width="1.5"/>
+      <rect x="0" y="0" width="10" height="190" rx="6" fill="url(#teal)" opacity="0.95"/>
+
+      <!-- C badge -->
+      <g transform="translate(32, 34)">
+        <rect x="0" y="0" width="54" height="54" rx="14" fill="rgba(51,240,214,0.14)" stroke="rgba(51,240,214,0.55)"/>
+        <text x="27" y="38" text-anchor="middle" class="badge" fill="#CFFFF8">C</text>
+      </g>
+
+      <!-- Icon: pilot flag -->
+      <g transform="translate(115, 34)" fill="none" stroke="#CFFFF8" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.95">
+        <path d="M14 60 V10"/>
+        <path d="M16 12 H46 L36 22 L46 32 H16 Z" fill="rgba(51,240,214,0.14)"/>
+        <path d="M16 12 H46 L36 22 L46 32 H16 Z"/>
+        <path d="M10 60 H24"/>
+      </g>
+
+      <!-- Text -->
+      <text x="200" y="78" class="boxTitle" fill="#FFFFFF">C — Start a Pilot</text>
+      <text x="200" y="116" class="boxDesc" fill="rgba(255,255,255,0.86)">Run a fast proof‑of‑value with clear deliverables.</text>
+
+      <!-- CTA chip -->
+      <g transform="translate(620, 64)">
+        <rect x="0" y="0" width="188" height="54" rx="16" fill="rgba(51,240,214,0.12)" stroke="rgba(51,240,214,0.55)"/>
+        <text x="94" y="36" text-anchor="middle" font-size="18" font-weight="700" fill="#CFFFF8">Launch pilot</text>
+      </g>
+    </g>
+
+  </g>
+
+  <!-- Bottom micro-accent / brand line -->
+  <g transform="translate(110, 955)" class="font">
+    <rect x="0" y="0" width="860" height="1.5" fill="rgba(255,255,255,0.10)"/>
+    <g transform="translate(0, 26)">
+      <circle cx="10" cy="10" r="6" fill="url(#teal)" opacity="0.95"/>
+      <text x="28" y="15" font-size="18" font-weight="600" fill="rgba(255,255,255,0.72)">Reply with A / B / C</text>
+    </g>
+  </g>
+</svg>

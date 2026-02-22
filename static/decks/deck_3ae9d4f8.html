@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pitch — CEO</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0a0a0a;
+    color: #e8e8e8;
+    overflow: hidden;
+    height: 100vh;
+}
+.deck-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+.slide {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    padding: 60px 80px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    animation: fadeIn 0.4s ease;
+}
+.slide.active { display: flex; flex-direction: column; justify-content: center; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.slide-number {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 300;
+}
+.slide-title {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+.slide-body {
+    font-size: 22px;
+    line-height: 1.7;
+    color: #c0c0c0;
+    margin-bottom: 30px;
+    max-width: 900px;
+}
+.slide-bullets {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+}
+.slide-bullets li {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #d0d0d0;
+    padding: 8px 0 8px 30px;
+    position: relative;
+}
+.slide-bullets li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 16px;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 3px;
+}
+.speaker-notes {
+    position: absolute;
+    bottom: 30px;
+    left: 80px;
+    right: 80px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.25);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 12px;
+}
+.controls {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+.controls button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+.controls button:hover { background: rgba(255,255,255,0.2); }
+.progress {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.3s ease;
+    z-index: 100;
+}
+.slide-counter {
+    position: fixed;
+    bottom: 35px;
+    left: 40px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    z-index: 100;
+}
+.title-slide .slide-title {
+    font-size: 56px;
+    text-align: center;
+}
+.title-slide .slide-body {
+    text-align: center;
+    margin: 0 auto;
+}
+</style>
+</head>
+<body>
+<div class="deck-container">
+
+        <div class="slide" id="slide-1">
+            <div class="slide-number">1</div>
+            <h2 class="slide-title">Executive Summary</h2>
+            <div class="slide-body">Proposal: Position a grant-funded, done-for-you sales & marketing product as our primary offer to accelerate subscriber growth for funded operators and remove financial barriers to adoption.</div>
+            <ul class='slide-bullets'><li>Primary offer: packaged, grant-eligible marketing + pre-order program</li><li>Target: builders with current or probable grant awards (highest ROI)</li><li>Tactical focus: speed (30/60/90 day impact), grant-payable billing, and partner channels</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> We pitch a single high-conviction product: a turnkey marketing & pre-order program that grant administrators can pay for. This reduces the most common objection (no cash) and opens a faster path to measurable subscriber growth. The deck will justify segmentation, GTM, operations, and a pilot ask.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-2">
+            <div class="slide-number">2</div>
+            <h2 class="slide-title">Problem: Financial & Time Frictions</h2>
+            <div class="slide-body">Operators often have grant dollars but won’t spend internal cash; simultaneously they're under time pressure where subscriber velocity dictates valuation and options.</div>
+            <ul class='slide-bullets'><li>Available grant funds exist, but operators resist out-of-pocket spend</li><li>Slow subscriber growth compresses exit and funding options</li><li>Current offers fail to address both financial friction and urgency</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Two simultaneous frictions: affordability (operators won't spend cash) and urgency (they must accelerate growth to avoid valuation decay). Any product must remove financial friction and deliver fast, measurable impact.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-3">
+            <div class="slide-number">3</div>
+            <h2 class="slide-title">Strategic Opportunity: Grant-Payable Primary Offer</h2>
+            <div class="slide-body">Make a grant-eligible, done-for-you sales & marketing package our core product to eliminate the primary buying objection and convert grant budgets into procurement of our services.</div>
+            <ul class='slide-bullets'><li>Design the offer as a line-item that fits common grant budgets (marketing, pre-orders, lead capture)</li><li>Explicitly state 'grant funds can cover this' in materials and quotes</li><li>Prioritize outreach to grant winners/applicants and grant advisors</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> By packaging our service to align with grant allowable expenses and making the billing/fulfillment flow explicit, we transform procurement from discretionary to straightforward. This is a lower-resistance acquisition channel compared to cash sales.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-4">
+            <div class="slide-number">4</div>
+            <h2 class="slide-title">Product Design: Core Components & Deliverables</h2>
+            <div class="slide-body">A compact, repeatable product that delivers measurable subscriber acceleration in 30/60/90 day increments and is easy to procure via grants.</div>
+            <ul class='slide-bullets'><li>Core: pre-order campaign + lead capture + targeted outreach + fulfillment flow</li><li>Deliverables: outreach templates, sales collateral, billing documentation for grants</li><li>Timeline guarantees: clear 30/60/90 day impact milestones</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> The product must be concrete and auditable for grant administrators: scope, costs, deliverables, and milestones. Guarantee specific outcomes in short windows to match operators' time sensitivity and increase conversion.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-5">
+            <div class="slide-number">5</div>
+            <h2 class="slide-title">Go-to-Market: Target Segments & Prioritization</h2>
+            <div class="slide-body">Focus resources on fiber-builders and operators with grant awards or high probability of awards — they produce the best pre-order convertibility and case-study potential.</div>
+            <ul class='slide-bullets'><li>Segment priority: fiber-builders with active or imminent grants</li><li>Tactical outreach tied to procurement timelines and build schedules</li><li>Include a pre-order playbook to convert grant wins into committed subscribers before build completion</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Concentrate sales effort where grant dollars + build plans align. These clients can fund marketing, produce pre-orders, and generate scalable case studies. Tailor timing to their procurement windows to close faster.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-6">
+            <div class="slide-number">6</div>
+            <h2 class="slide-title">Sales Messaging & Outreach Framework</h2>
+            <div class="slide-body">Adopt messaging that removes identity-based resistance to outsourcing and highlights grant funding and rapid impact.</div>
+            <ul class='slide-bullets'><li>Reframe outsourcing as leverage: emphasize owners keep core work while we scale subscribers</li><li>Create outbound templates that explicitly note eligibility for grant payment and show billing flow</li><li>Use an urgency framework: diagnostics that flag 'running out of moves' and escalate offers</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Owners are protective of their role — we must normalize outsourcing as a strategic lever. Templates should be direct: explain how the service maps to grant categories, the billing path, and immediate outcomes to trigger action under time pressure.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-7">
+            <div class="slide-number">7</div>
+            <h2 class="slide-title">Partnerships & Channel Strategy</h2>
+            <div class="slide-body">Accelerate procurement and reach by partnering with grant advisors, local economic development agencies, and procurement consultants.</div>
+            <ul class='slide-bullets'><li>Prioritize partnerships with grant advisors to get early access to winners/applicants</li><li>Co-develop procurement-ready collateral that advisors can include in grant spend recommendations</li><li>Use partner referrals to fast-track procurement checks and remove bureaucracy</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Grant advisors are force multipliers: they validate eligibility and can recommend our product as a line-item. Build simple partner materials (SOW + billing templates) so advisors can confidently refer us into procurement processes.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-8">
+            <div class="slide-number">8</div>
+            <h2 class="slide-title">Delivery & Client Experience</h2>
+            <div class="slide-body">Operationalize rapid deployment with diagnostics, fast-deploy tactics, training modules, and documented fulfillment to maintain client control while we execute.</div>
+            <ul class='slide-bullets'><li>Fast-deploy tactics: lead stewardship, pre-order campaigns, templated outreach</li><li>Short training modules to ease ownership transfer and preserve client control</li><li>Documented billing/fulfillment flow for grant reporting and compliance</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> We must be able to deploy quickly and hand back control where appropriate. Short trainings reduce identity friction and ensure clients feel in charge. Every engagement must produce grant-reportable artifacts to satisfy auditors.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-9">
+            <div class="slide-number">9</div>
+            <h2 class="slide-title">Metrics, Pricing & Expected ROI</h2>
+            <div class="slide-body">Define clear KPIs, price as grant-eligible line items, and model conservative outcomes for the first pilot cohort.</div>
+            <ul class='slide-bullets'><li>KPIs: pre-orders committed, qualified leads, conversion rate, subscribers added in 30/60/90 days</li><li>Pricing: modular line-items aligned to grant expense categories (campaign + fulfillment + reporting)</li><li>Expected pilot outcomes: X pre-orders / Y qualified leads in 90 days (use conservative conversion assumptions)</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> We sell measurable outcomes. For a pilot, set conservative targets and report weekly. Pricing must be transparent and allocable to common grant categories. Track CAC, payback period, and incremental valuation impact where possible.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-10">
+            <div class="slide-number">10</div>
+            <h2 class="slide-title">Ask: Pilot & Next Steps</h2>
+            <div class="slide-body">Approve a focused pilot: 6-week launch with 3 target operators, partner outreach to 5 grant advisors, and build templates + SOW for procurement.</div>
+            <ul class='slide-bullets'><li>Approve resources for a 6-week pilot (sales + delivery + partner outreach)</li><li>Target: 3 pilots with builders holding or likely to win grants; prioritize fiber builds</li><li>Deliverables: grant-ready SOW, outreach templates, 30/60/90 playbook, pilot metrics dashboard</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> I recommend immediate approval for a time-boxed pilot. We will measure pre-orders and qualified leads, iterate on messaging with grant advisors, and produce case studies to scale. Expected decision points: go/no-go at week 6 based on pilot KPIs.</div>
+        </div>
+        
+</div>
+<div class="progress" id="progress"></div>
+<div class="slide-counter" id="counter">1 / 10</div>
+<div class="controls">
+    <button onclick="prevSlide()">Prev</button>
+    <button onclick="nextSlide()">Next</button>
+</div>
+<script>
+let current = 0;
+const total = 10;
+const slides = document.querySelectorAll('.slide');
+if (slides.length > 0) slides[0].classList.add('active');
+if (slides.length > 0 && slides[0]) slides[0].classList.add('title-slide');
+function showSlide(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[n].classList.add('active');
+    document.getElementById('counter').textContent = (n+1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((n+1)/total*100) + '%';
+}
+function nextSlide() { if (current < total-1) { current++; showSlide(current); } }
+function prevSlide() { if (current > 0) { current--; showSlide(current); } }
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+});
+showSlide(0);
+</script>
+</body>
+</html>

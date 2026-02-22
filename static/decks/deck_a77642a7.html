@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decision — CEO</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0a0a0a;
+    color: #e8e8e8;
+    overflow: hidden;
+    height: 100vh;
+}
+.deck-container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+.slide {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    padding: 60px 80px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+    animation: fadeIn 0.4s ease;
+}
+.slide.active { display: flex; flex-direction: column; justify-content: center; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.slide-number {
+    position: absolute;
+    top: 30px;
+    right: 40px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 300;
+}
+.slide-title {
+    font-size: 42px;
+    font-weight: 700;
+    margin-bottom: 30px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+}
+.slide-body {
+    font-size: 22px;
+    line-height: 1.7;
+    color: #c0c0c0;
+    margin-bottom: 30px;
+    max-width: 900px;
+}
+.slide-bullets {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 30px;
+}
+.slide-bullets li {
+    font-size: 20px;
+    line-height: 1.6;
+    color: #d0d0d0;
+    padding: 8px 0 8px 30px;
+    position: relative;
+}
+.slide-bullets li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 16px;
+    width: 12px;
+    height: 12px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 3px;
+}
+.speaker-notes {
+    position: absolute;
+    bottom: 30px;
+    left: 80px;
+    right: 80px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.25);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding-top: 12px;
+}
+.controls {
+    position: fixed;
+    bottom: 30px;
+    right: 40px;
+    display: flex;
+    gap: 10px;
+    z-index: 100;
+}
+.controls button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
+.controls button:hover { background: rgba(255,255,255,0.2); }
+.progress {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transition: width 0.3s ease;
+    z-index: 100;
+}
+.slide-counter {
+    position: fixed;
+    bottom: 35px;
+    left: 40px;
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    z-index: 100;
+}
+.title-slide .slide-title {
+    font-size: 56px;
+    text-align: center;
+}
+.title-slide .slide-body {
+    text-align: center;
+    margin: 0 auto;
+}
+</style>
+</head>
+<body>
+<div class="deck-container">
+
+        <div class="slide" id="slide-1">
+            <div class="slide-number">1</div>
+            <h2 class="slide-title">Executive Summary</h2>
+            <div class="slide-body">Concise overview of the business proposition, market opportunity, traction to date, and the investment or decision requested.</div>
+            <ul class='slide-bullets'><li>Business: what we do and for whom</li><li>Opportunity size and growth rate</li><li>Key traction metrics to date</li><li>Ask: capital, partnership, or approval</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> I'll open with the core thesis: who we are, why the market is sizable now, what we've proven so far, and the concrete ask. Keep attention on return potential and near-term milestones.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-2">
+            <div class="slide-number">2</div>
+            <h2 class="slide-title">Problem Definition</h2>
+            <div class="slide-body">Define the specific problem experienced by target customers, quantify pain points, and show current solutions' shortcomings.</div>
+            <ul class='slide-bullets'><li>Clear articulation of customer pain (time, cost, risk)</li><li>Market segments most affected</li><li>Existing solutions: gaps and inefficiencies</li><li>Quantified impact on customer economics</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> State the problem in measurable terms—lost revenue, wasted labor hours, regulatory risk. I want the audience to feel urgency and understand why existing options fail.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-3">
+            <div class="slide-number">3</div>
+            <h2 class="slide-title">Market Opportunity</h2>
+            <div class="slide-body">Analytical sizing of the addressable market, target segments, and growth drivers that make this a timely investment.</div>
+            <ul class='slide-bullets'><li>Total Addressable Market (TAM), Serviceable Addressable Market (SAM)</li><li>Target segment and initial beachhead</li><li>Growth drivers: technology, regulation, behavior shifts</li><li>Key adoption assumptions and timelines</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Present the numbers and the assumptions behind them. Be explicit about the beachhead market we will capture first and why it scales. I will highlight conservative and aggressive scenarios.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-4">
+            <div class="slide-number">4</div>
+            <h2 class="slide-title">Our Solution</h2>
+            <div class="slide-body">Describe the product/service, core capabilities, and how it solves the identified problem better than alternatives.</div>
+            <ul class='slide-bullets'><li>Core features and value propositions</li><li>Differentiation: speed, cost, quality, compliance</li><li>Customer outcomes and proof points</li><li>Implementation and integration footprint</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Explain the solution in plain terms and link each capability to a customer benefit. I will use one or two short customer examples to validate effectiveness.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-5">
+            <div class="slide-number">5</div>
+            <h2 class="slide-title">Business Model</h2>
+            <div class="slide-body">Revenue model, pricing strategy, unit economics, and scalability levers that drive margin expansion over time.</div>
+            <ul class='slide-bullets'><li>Primary revenue streams (subscription, transaction, services)</li><li>Pricing rationale and competitive positioning</li><li>Unit economics: CAC, LTV, payback period</li><li>Operational levers to improve margins at scale</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Highlight the path to profitability: current unit economics and levers to improve them. Be candid about customer acquisition costs and how we'll reduce them.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-6">
+            <div class="slide-number">6</div>
+            <h2 class="slide-title">Go-to-Market Strategy</h2>
+            <div class="slide-body">Targeted GTM plan: channels, partnerships, sales motions, and early traction tactics to accelerate adoption.</div>
+            <ul class='slide-bullets'><li>Primary channels: direct sales, channel partners, digital</li><li>Customer acquisition playbook and funnel metrics</li><li>Partnerships and ecosystem strategy</li><li>Key hires and investments for GTM execution</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Outline the top three GTM priorities and expected timelines. I will commit to measurable KPIs and the resources required to hit them.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-7">
+            <div class="slide-number">7</div>
+            <h2 class="slide-title">Financial Forecast</h2>
+            <div class="slide-body">Three-year forward financials: revenue, gross margin, EBITDA trajectory, and underlying assumptions driving the model.</div>
+            <ul class='slide-bullets'><li>Projected revenue and margin profile by year</li><li>Capital requirements and burn rate</li><li>Break-even and cash runway scenarios</li><li>Key sensitivities and upside drivers</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Present a concise forecast with the assumptions called out. I'll emphasize cash runway under base and downside cases and the funding needed to reach key value-creating milestones.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-8">
+            <div class="slide-number">8</div>
+            <h2 class="slide-title">Competitive Landscape & Moat</h2>
+            <div class="slide-body">Map of competitors, relative positioning, and the sustainable advantages that protect our economics.</div>
+            <ul class='slide-bullets'><li>Direct and indirect competitors overview</li><li>Our positioning on core attributes (price, features, service)</li><li>Sustainable moats: data, distribution, partnerships, IP</li><li>Potential competitive responses and our counters</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Be explicit about who can attack our position and why we will hold advantage. I want to show defensibility and realistic threats with mitigation paths.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-9">
+            <div class="slide-number">9</div>
+            <h2 class="slide-title">Risks & Mitigations</h2>
+            <div class="slide-body">Top risks to execution, market, product, and finance with concrete mitigation strategies for each.</div>
+            <ul class='slide-bullets'><li>Execution risk and contingency plans</li><li>Market adoption risk and validation steps</li><li>Technical or regulatory risks and compliance roadmap</li><li>Financial risks and capital management approaches</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Acknowledge material risks candidly and present concrete, prioritized mitigations. I will stress that risk management is baked into the plan, not an afterthought.</div>
+        </div>
+        
+
+        <div class="slide" id="slide-10">
+            <div class="slide-number">10</div>
+            <h2 class="slide-title">Ask & Next Steps</h2>
+            <div class="slide-body">Specific request (funding amount or decision), use of proceeds, milestones tied to the ask, and immediate next steps if approved.</div>
+            <ul class='slide-bullets'><li>Exact ask: amount, type, and valuation expectations if applicable</li><li>Use of funds mapped to milestones and timelines</li><li>Desired decision timeline and governance terms</li><li>Immediate actions post-approval</li></ul>
+            <div class='speaker-notes'><strong>Notes:</strong> Close with a precise ask and a pragmatic execution plan. I will specify milestones that trigger the next tranche or decision, and propose a timeline for commitment and first deliverables.</div>
+        </div>
+        
+</div>
+<div class="progress" id="progress"></div>
+<div class="slide-counter" id="counter">1 / 10</div>
+<div class="controls">
+    <button onclick="prevSlide()">Prev</button>
+    <button onclick="nextSlide()">Next</button>
+</div>
+<script>
+let current = 0;
+const total = 10;
+const slides = document.querySelectorAll('.slide');
+if (slides.length > 0) slides[0].classList.add('active');
+if (slides.length > 0 && slides[0]) slides[0].classList.add('title-slide');
+function showSlide(n) {
+    slides.forEach(s => s.classList.remove('active'));
+    slides[n].classList.add('active');
+    document.getElementById('counter').textContent = (n+1) + ' / ' + total;
+    document.getElementById('progress').style.width = ((n+1)/total*100) + '%';
+}
+function nextSlide() { if (current < total-1) { current++; showSlide(current); } }
+function prevSlide() { if (current > 0) { current--; showSlide(current); } }
+document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+});
+showSlide(0);
+</script>
+</body>
+</html>

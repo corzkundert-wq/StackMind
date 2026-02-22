@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" role="img" aria-label="Step-by-step framework infographic card">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#07122B"/>
+      <stop offset="0.5" stop-color="#1A1F5C"/>
+      <stop offset="1" stop-color="#0B4D5C"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="18%" r="70%">
+      <stop offset="0" stop-color="#7C3AED" stop-opacity="0.35"/>
+      <stop offset="0.55" stop-color="#22D3EE" stop-opacity="0.12"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B1636" stop-opacity="0.86"/>
+      <stop offset="1" stop-color="#091024" stop-opacity="0.86"/>
+    </linearGradient>
+    <linearGradient id="strokeGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22D3EE" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#7C3AED" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#22C55E" stop-opacity="0.35"/>
+    </linearGradient>
+    <linearGradient id="timeline" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#22D3EE"/>
+      <stop offset="0.5" stop-color="#7C3AED"/>
+      <stop offset="1" stop-color="#10B981"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#000000" flood-opacity="0.35"/>
+    </filter>
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="18"/>
+    </filter>
+    <style>
+      .sans{font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";}
+      .headline{font-weight:800; font-size:56px; letter-spacing:-0.5px;}
+      .sub{font-weight:500; font-size:22px; opacity:0.9;}
+      .label{font-weight:700; font-size:20px;}
+      .small{font-weight:600; font-size:16px; opacity:0.9;}
+      .micro{font-weight:600; font-size:14px; opacity:0.75;}
+      .num{font-weight:900; font-size:22px;}
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#bg)"/>
+  <rect width="1080" height="1080" fill="url(#glow)"/>
+
+  <!-- Subtle geometric accents -->
+  <g opacity="0.35">
+    <path d="M880 90 L1030 240 L970 300 L820 150 Z" fill="#22D3EE" opacity="0.18"/>
+    <path d="M90 860 L240 710 L310 780 L160 930 Z" fill="#7C3AED" opacity="0.16"/>
+    <circle cx="940" cy="880" r="140" fill="#10B981" opacity="0.08"/>
+  </g>
+
+  <!-- Main card -->
+  <g filter="url(#shadow)">
+    <rect x="70" y="70" width="940" height="940" rx="34" fill="url(#card)" stroke="url(#strokeGrad)" stroke-opacity="0.45"/>
+  </g>
+
+  <!-- Red accent rail -->
+  <g>
+    <rect x="70" y="70" width="14" height="940" rx="7" fill="#EF4444"/>
+    <rect x="84" y="70" width="4" height="940" fill="#FFFFFF" opacity="0.10"/>
+  </g>
+
+  <!-- Header -->
+  <g class="sans" fill="#EAF2FF">
+    <text x="120" y="165" class="headline">90-Day GTM Framework</text>
+    <text x="120" y="205" class="sub">Five steps from market clarity to buyer-ready signals</text>
+  </g>
+
+  <!-- 90-day timeline bar -->
+  <g class="sans" transform="translate(120,240)">
+    <text x="0" y="0" fill="#EAF2FF" class="small">Timeline</text>
+    <text x="0" y="22" fill="#EAF2FF" class="micro">0</text>
+    <text x="780" y="22" fill="#EAF2FF" class="micro" text-anchor="end">90 days</text>
+
+    <rect x="0" y="34" width="780" height="14" rx="7" fill="#0B2A3D" opacity="0.9" stroke="#7C3AED" stroke-opacity="0.25"/>
+    <rect x="0" y="34" width="780" height="14" rx="7" fill="url(#timeline)" opacity="0.95"/>
+
+    <!-- 5 segment dividers -->
+    <g opacity="0.55" stroke="#EAF2FF" stroke-width="2">
+      <line x1="156" y1="34" x2="156" y2="48"/>
+      <line x1="312" y1="34" x2="312" y2="48"/>
+      <line x1="468" y1="34" x2="468" y2="48"/>
+      <line x1="624" y1="34" x2="624" y2="48"/>
+    </g>
+
+    <!-- Milestone dots -->
+    <g>
+      <circle cx="0" cy="41" r="6" fill="#EAF2FF" opacity="0.9"/>
+      <circle cx="156" cy="41" r="6" fill="#EAF2FF" opacity="0.9"/>
+      <circle cx="312" cy="41" r="6" fill="#EAF2FF" opacity="0.9"/>
+      <circle cx="468" cy="41" r="6" fill="#EAF2FF" opacity="0.9"/>
+      <circle cx="624" cy="41" r="6" fill="#EAF2FF" opacity="0.9"/>
+      <circle cx="780" cy="41" r="6" fill="#EAF2FF" opacity="0.9"/>
+    </g>
+  </g>
+
+  <!-- Five numbered blocks -->
+  <g class="sans" transform="translate(120,350)">
+    <!-- layout constants: 2 columns, 3 rows with last row single wide -->
+
+    <!-- Block 1 -->
+    <g transform="translate(0,0)">
+      <rect x="0" y="0" width="395" height="150" rx="22" fill="#0A1C3A" opacity="0.96" stroke="#22D3EE" stroke-opacity="0.28"/>
+      <circle cx="48" cy="48" r="22" fill="#EF4444"/>
+      <text x="48" y="56" text-anchor="middle" class="num" fill="#0B1024">1</text>
+      <text x="92" y="56" class="label" fill="#EAF2FF">Market triage</text>
+      <text x="92" y="88" class="micro" fill="#EAF2FF">ICP + pain map + pricing anchors</text>
+      <!-- icon: compass -->
+      <g transform="translate(315,36)" opacity="0.95">
+        <circle cx="44" cy="44" r="30" fill="none" stroke="#EAF2FF" stroke-opacity="0.35" stroke-width="3"/>
+        <path d="M44 26 L56 44 L44 62 L32 44 Z" fill="#22D3EE" opacity="0.85"/>
+        <path d="M44 32 L52 44 L44 56 L36 44 Z" fill="#7C3AED" opacity="0.7"/>
+        <circle cx="44" cy="44" r="4" fill="#EAF2FF" opacity="0.9"/>
+      </g>
+    </g>
+
+    <!-- Block 2 -->
+    <g transform="translate(415,0)">
+      <rect x="0" y="0" width="395" height="150" rx="22" fill="#0A1C3A" opacity="0.96" stroke="#7C3AED" stroke-opacity="0.28"/>
+      <circle cx="48" cy="48" r="22" fill="#EF4444"/>
+      <text x="48" y="56" text-anchor="middle" class="num" fill="#0B1024">2</text>
+      <text x="92" y="56" class="label" fill="#EAF2FF">Demand test</text>
+      <text x="92" y="88" class="micro" fill="#EAF2FF">Landing + offers + outbound scripts</text>
+      <!-- icon: megaphone -->
+      <g transform="translate(312,34)" opacity="0.95" fill="none" stroke="#EAF2FF" stroke-opacity="0.55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 56 L52 44 L52 76 L22 64 Z" fill="#22D3EE" opacity="0.35" stroke="none"/>
+        <path d="M52 44 L78 30 L78 90 L52 76 Z"/>
+        <path d="M22 56 L14 56 Q8 56 8 62 Q8 68 14 68 L22 68"/>
+        <path d="M30 66 L40 98"/>
+        <path d="M84 46 Q98 54 98 60 Q98 66 84 74"/>
+      </g>
+    </g>
+
+    <!-- Block 3 -->
+    <g transform="translate(0,170)">
+      <rect x="0" y="0" width="395" height="150" rx="22" fill="#0A1C3A" opacity="0.96" stroke="#10B981" stroke-opacity="0.28"/>
+      <circle cx="48" cy="48" r="22" fill="#EF4444"/>
+      <text x="48" y="56" text-anchor="middle" class="num" fill="#0B1024">3</text>
+      <text x="92" y="56" class="label" fill="#EAF2FF">Operational guarantee</text>
+      <text x="92" y="88" class="micro" fill="#EAF2FF">SLAs + onboarding + risk reversal</text>
+      <!-- icon: shield/check -->
+      <g transform="translate(318,30)" opacity="0.95">
+        <path d="M44 18 C62 26 72 28 72 28 V56 C72 74 60 88 44 96 C28 88 16 74 16 56 V28 C16 28 26 26 44 18 Z" fill="#10B981" opacity="0.22"/>
+        <path d="M44 18 C62 26 72 28 72 28 V56 C72 74 60 88 44 96 C28 88 16 74 16 56 V28 C16 28 26 26 44 18 Z" fill="none" stroke="#EAF2FF" stroke-opacity="0.5" stroke-width="3"/>
+        <path d="M30 56 L40 66 L60 44" fill="none" stroke="#22D3EE" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      </g>
+    </g>
+
+    <!-- Block 4 -->
+    <g transform="translate(415,170)">
+      <rect x="0" y="0" width="395" height="150" rx="22" fill="#0A1C3A" opacity="0.96" stroke="#22D3EE" stroke-opacity="0.28"/>
+      <circle cx="48" cy="48" r="22" fill="#EF4444"/>
+      <text x="48" y="56" text-anchor="middle" class="num" fill="#0B1024">4</text>
+      <text x="92" y="56" class="label" fill="#EAF2FF">Measure</text>
+      <text x="92" y="88" class="micro" fill="#EAF2FF">Instrument funnel + cohorts + unit economics</text>
+      <!-- icon: chart -->
+      <g transform="translate(314,34)" opacity="0.95">
+        <rect x="14" y="18" width="74" height="74" rx="14" fill="#7C3AED" opacity="0.16"/>
+        <path d="M26 80 V56" stroke="#EAF2FF" stroke-opacity="0.55" stroke-width="4" stroke-linecap="round"/>
+        <path d="M44 80 V44" stroke="#EAF2FF" stroke-opacity="0.65" stroke-width="4" stroke-linecap="round"/>
+        <path d="M62 80 V34" stroke="#EAF2FF" stroke-opacity="0.85" stroke-width="4" stroke-linecap="round"/>
+        <path d="M24 50 L44 42 L62 32 L78 28" fill="none" stroke="#22D3EE" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="44" cy="42" r="4" fill="#EF4444"/>
+        <circle cx="62" cy="32" r="4" fill="#EF4444"/>
+      </g>
+    </g>
+
+    <!-- Block 5 (wide) -->
+    <g transform="translate(0,340)">
+      <rect x="0" y="0" width="810" height="170" rx="24" fill="#0A1C3A" opacity="0.98" stroke="#EF4444" stroke-opacity="0.55"/>
+      <circle cx="48" cy="52" r="22" fill="#EF4444"/>
+      <text x="48" y="60" text-anchor="middle" class="num" fill="#0B1024">5</text>
+      <text x="92" y="60" class="label" fill="#EAF2FF">Signal to buyers</text>
+      <text x="92" y="92" class="micro" fill="#EAF2FF">Proof points, benchmarks, case studies, review flywheel</text>
+
+      <!-- icon: signal/waves -->
+      <g transform="translate(700,32)" opacity="0.95" stroke="#EAF2FF" stroke-opacity="0.6" fill="none" stroke-width="3" stroke-linecap="round">
+        <path d="M36 86 V44"/>
+        <circle cx="36" cy="96" r="6" fill="#22D3EE" stroke="none"/>
+        <path d="M56 44 Q82 66 56 88"/>
+        <path d="M66 34 Q104 66 66 98"/>
+        <path d="M46 54 Q60 66 46 78"/>
+      </g>
+
+      <!-- metric pills -->
+      <g transform="translate(92,118)">
+        <!-- Conversion -->
+        <g>
+          <rect x="0" y="0" width="230" height="40" rx="20" fill="#091024" stroke="#22D3EE" stroke-opacity="0.28"/>
+          <g transform="translate(14,10)">
+            <circle cx="10" cy="10" r="10" fill="#22D3EE" opacity="0.9"/>
+            <text x="10" y="14" text-anchor="middle" class="micro" fill="#0B1024" style="font-weight:900">%</text>
+          </g>
+          <text x="48" y="26" class="small" fill="#EAF2FF">Conversion %</text>
+        </g>
+        <!-- CAC -->
+        <g transform="translate(246,0)">
+          <rect x="0" y="0" width="160" height="40" rx="20" fill="#091024" stroke="#7C3AED" stroke-opacity="0.28"/>
+          <g transform="translate(14,10)">
+            <circle cx="10" cy="10" r="10" fill="#7C3AED" opacity="0.9"/>
+            <text x="10" y="14" text-anchor="middle" class="micro" fill="#0B1024" style="font-weight:900">$</text>
+          </g>
+          <text x="48" y="26" class="small" fill="#EAF2FF">CAC</text>
+        </g>
+        <!-- Time to activation -->
+        <g transform="translate(422,0)">
+          <rect x="0" y="0" width="290" height="40" rx="20" fill="#091024" stroke="#10B981" stroke-opacity="0.28"/>
+          <g transform="translate(14,10)">
+            <circle cx="10" cy="10" r="10" fill="#10B981" opacity="0.9"/>
+            <path d="M10 5 V10 L13 12" stroke="#0B1024" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+          <text x="48" y="26" class="small" fill="#EAF2FF">Time-to-activation</text>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- Footer microline -->
+  <g class="sans" transform="translate(120,1005)" fill="#EAF2FF" opacity="0.75">
+    <text x="0" y="0" class="micro">Use this as an execution checklist: validate → de-risk ops → measure → market proof.</text>
+  </g>
+</svg>
