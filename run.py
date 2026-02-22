@@ -4,21 +4,26 @@ import os
 import time
 import threading
 
+
 def run_fastapi():
     subprocess.run([
         sys.executable, "-m", "uvicorn",
         "src.backend.main:app",
         "--host", "0.0.0.0",
-        "--port", "8000",
-        "--reload",
+        "--port", "8000"
     ])
+
 
 def run_streamlit():
     time.sleep(3)
+
+    # Render assigns this automatically
+    port = os.environ.get("PORT", "10000")
+
     subprocess.run([
         sys.executable, "-m", "streamlit", "run",
         "src/frontend/app.py",
-        "--server.port", "5000",
+        "--server.port", port,
         "--server.address", "0.0.0.0",
         "--server.headless", "true",
         "--browser.gatherUsageStats", "false",
@@ -28,6 +33,7 @@ def run_streamlit():
         "--theme.secondaryBackgroundColor", "#1a1d24",
         "--theme.textColor", "#e0e0e0",
     ])
+
 
 if __name__ == "__main__":
     api_thread = threading.Thread(target=run_fastapi, daemon=True)
