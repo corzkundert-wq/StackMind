@@ -3,7 +3,39 @@ import requests
 import json
 import os
 import urllib.parse
+import hmac
 
+# ===============================
+# 🔒 DEMO PASSWORD PROTECTION
+# ===============================
+
+DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "")
+
+def require_demo_password():
+    if not DEMO_PASSWORD:
+        st.error("DEMO_PASSWORD is not set. Add it in Render → Environment Variables.")
+        st.stop()
+
+    # already authenticated this session
+    if st.session_state.get("demo_authenticated"):
+        return
+
+    st.markdown("<h2 style='text-align:center;'>🔒 Demo Access Required</h2>", unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        password_input = st.text_input("Enter Password", type="password")
+        if st.button("Continue"):
+            if hmac.compare_digest(password_input, DEMO_PASSWORD):
+                st.session_state["demo_authenticated"] = True
+                st.rerun()
+            else:
+                st.error("Incorrect password.")
+
+    # stop the app until password is correct
+    st.stop()
+
+require_demo_password()
 API_URL = "http://localhost:8000"
 DOMAIN = os.environ.get("REPLIT_DEV_DOMAIN", os.environ.get("REPLIT_DOMAINS", "localhost:5000"))
 PUBLIC_URL = f"https://{DOMAIN}"
