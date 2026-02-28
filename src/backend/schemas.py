@@ -85,6 +85,7 @@ class ModuleRunRequest(BaseModel):
     top_k: int = 10
     use_all_chunks: bool = False
     params: dict = {}
+    fast: bool = True
 
 class VoteRequest(BaseModel):
     artifact_item_id: str
@@ -314,3 +315,12 @@ class UpdateSavedContentRequest(BaseModel):
     folder: Optional[str] = None
     status: Optional[str] = None
     meta: Optional[dict] = None
+
+class CeoTalkKitRequest(BaseModel):
+    identity: str = "CEO / M&A"
+    duration: str = "45 minutes"
+    audience: str = "ISP Operators"
+    output_mode: str = "Generate Full TalkKit"
+    include_leverage_pack: bool = True
+    source_modules: List[str] = []
+    persona_context: Optional[dict] = None

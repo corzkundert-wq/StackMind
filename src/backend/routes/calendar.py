@@ -3,9 +3,10 @@ from sqlalchemy.orm import Session as DBSession
 from sqlalchemy import func
 from src.backend.database import get_db
 from src.backend.models import CalendarEntry
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import Optional, List
 from datetime import datetime
+import re
 
 router = APIRouter(prefix="/calendar", tags=["calendar"])
 
@@ -20,6 +21,17 @@ class CalendarCreate(BaseModel):
     color: str = "blue"
     session_id: Optional[str] = None
     meta: dict = {}
+
+    @field_validator("scheduled_time")
+    @classmethod
+    def validate_time(cls, v):
+        if v and re.match(r'^\d{1,2}:\d{2}$', v):
+            return v if len(v) == 5 else f"0{v}"
+        m = re.search(r'(\d{1,2}:\d{2})', v or "")
+        if m:
+            t = m.group(1)
+            return t if len(t) == 5 else f"0{t}"
+        return "09:00"
 
 class CalendarUpdate(BaseModel):
     title: Optional[str] = None

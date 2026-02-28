@@ -12,6 +12,7 @@ from src.backend.services.action_service import (
     generate_email_sequence, run_video_pipeline,
     update_approval_status, send_webhook, generate_post_image,
     generate_blog_series, consolidate_summary, suggest_thesis,
+    generate_ceo_talkkit,
 )
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -68,11 +69,50 @@ for mod in MODULES:
             if req is None:
                 req = ModuleRunRequest()
             try:
-                return run_module(db, session_id, _mod, req.top_k, req.use_all_chunks, req.params)
+                return run_module(db, session_id, _mod, req.top_k, req.use_all_chunks, req.params, fast=req.fast if hasattr(req, 'fast') else False)
             except Exception as e:
                 raise HTTPException(status_code=400, detail=str(e))
         return run_mod
     make_route(mod)
+
+@router.post("/{session_id}/run_batch")
+def run_batch_modules(session_id: str, req: dict):
+    modules = req.get("modules", [])
+    fast = req.get("fast", True)
+    top_k = req.get("top_k", 10)
+    use_all = req.get("use_all_chunks", False)
+    if not modules:
+        raise HTTPException(status_code=400, detail="No modules specified")
+    valid = [m for m in modules if m in MODULES]
+    if not valid:
+        raise HTTPException(status_code=400, detail="No valid modules specified")
+
+    import concurrent.futures
+    from src.backend.database import SessionLocal
+
+    max_workers = min(len(valid), 3)
+
+    def run_single(mod_name):
+        thread_db = SessionLocal()
+        try:
+            return mod_name, run_module(thread_db, session_id, mod_name, top_k=top_k, use_all=use_all, fast=fast), None
+        except Exception as e:
+            return mod_name, None, str(e)
+        finally:
+            thread_db.close()
+
+    results = {}
+    errors = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = {executor.submit(run_single, m): m for m in valid}
+        for future in concurrent.futures.as_completed(futures):
+            mod_name, result, error = future.result()
+            if error:
+                errors[mod_name] = error
+            else:
+                results[mod_name] = result
+
+    return {"results": results, "errors": errors, "modules_run": list(results.keys()), "modules_failed": list(errors.keys())}
 
 @router.post("/{session_id}/vote")
 def vote(session_id: str, req: VoteRequest, db: DBSession = Depends(get_db)):
@@ -293,5 +333,14 @@ def cross_doc_insights(session_id: str, db: DBSession = Depends(get_db)):
     try:
         result = cross_document_insights(db, session_id)
         return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+from src.backend.schemas import CeoTalkKitRequest
+
+@router.post("/{session_id}/ceo_talkkit")
+def ceo_talkkit(session_id: str, req: CeoTalkKitRequest, db: DBSession = Depends(get_db)):
+    try:
+        return generate_ceo_talkkit(db, session_id, req.model_dump())
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

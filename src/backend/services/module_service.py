@@ -56,7 +56,7 @@ def make_citations(chunks: list) -> list:
     return [{"file_id": str(c.file_id), "chunk_id": str(c.id), "chunk_index": c.chunk_index} for c in chunks[:5]]
 
 
-def run_module(db: DBSession, session_id: str, module_name: str, top_k: int = 10, use_all: bool = False, params: dict = None) -> dict:
+def run_module(db: DBSession, session_id: str, module_name: str, top_k: int = 10, use_all: bool = False, params: dict = None, fast: bool = False) -> dict:
     session_obj = db.query(Session).filter(Session.id == session_id).first()
     if not session_obj:
         raise ValueError("Session not found")
@@ -90,7 +90,7 @@ def run_module(db: DBSession, session_id: str, module_name: str, top_k: int = 10
 
     user_prompt = prompts["user"].format(context=context + extra_context, citations_hint=str(citations_hint), **(params or {}))
 
-    result = llm_structured_call(system_prompt, user_prompt)
+    result = llm_structured_call(system_prompt, user_prompt, fast=fast)
 
     artifact = Artifact(
         session_id=session_obj.id,

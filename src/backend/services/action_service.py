@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime
 from sqlalchemy.orm import Session as DBSession
 from src.backend.models import Artifact, ArtifactItem, Pin, Session, Approval, ApprovalStatus, Identity, Persona
-from src.backend.services.llm_service import llm_structured_call, generate_image
+from src.backend.services.llm_service import llm_structured_call, llm_structured_call_streaming, generate_image
 from src.backend.services.deck_renderer import render_deck_html
 
 IMAGES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))), "static", "images")
@@ -626,6 +626,275 @@ Return JSON with "items" array containing exactly one comprehensive summary obje
 
     result = llm_structured_call(system_prompt, user_prompt)
     return result
+
+
+def _deduplicate_chunks(chunk_texts: list, max_chunks: int = 10, max_chars_per_chunk: int = 2000) -> list:
+    seen_hashes = set()
+    unique = []
+    for text in chunk_texts:
+        text = text[:max_chars_per_chunk]
+        import hashlib as _hl
+        h = _hl.md5(text[:500].encode()).hexdigest()
+        if h not in seen_hashes:
+            seen_hashes.add(h)
+            unique.append(text)
+        if len(unique) >= max_chunks:
+            break
+    return unique
+
+
+def generate_ceo_talkkit(db: DBSession, session_id: str, request: dict) -> dict:
+    source_modules = request.get("source_modules", [])
+    content = ""
+    if source_modules:
+        content = get_session_artifacts_content(db, session_id, source_modules=source_modules)
+
+    session_obj = db.query(Session).filter(Session.id == session_id).first()
+    if not session_obj:
+        return {"error": "Session not found"}
+
+    from src.backend.models import File as FileModel, Chunk
+    import uuid as uuid_mod
+    file_ids = session_obj.selected_file_ids or []
+    if session_obj.selection_mode == "all" or not file_ids:
+        all_files = db.query(FileModel).filter(FileModel.library_id == session_obj.library_id).all()
+        file_ids = [str(f.id) for f in all_files]
+
+    all_chunk_texts = []
+    for fid in file_ids:
+        try:
+            fid_uuid = uuid_mod.UUID(str(fid))
+        except ValueError:
+            fid_uuid = fid
+        chunks = db.query(Chunk).filter(Chunk.file_id == fid_uuid).order_by(Chunk.chunk_index).limit(10).all()
+        for c in chunks:
+            all_chunk_texts.append(c.text)
+
+    if not all_chunk_texts:
+        all_files = db.query(FileModel).filter(FileModel.library_id == session_obj.library_id).all()
+        for f in all_files:
+            if f.raw_text and f.raw_text.strip():
+                all_chunk_texts.append(f.raw_text[:2000])
+            else:
+                chunks = db.query(Chunk).filter(Chunk.file_id == f.id).order_by(Chunk.chunk_index).limit(10).all()
+                for c in chunks:
+                    all_chunk_texts.append(c.text)
+
+    deduped = _deduplicate_chunks(all_chunk_texts, max_chunks=10, max_chars_per_chunk=2000)
+    raw_text = "\n\n---\n\n".join(deduped)
+
+    if not raw_text.strip() and not content.strip():
+        return {"error": "No content found. Upload files to your library first."}
+
+    combined_source = raw_text[:12000]
+    if content.strip():
+        combined_source += f"\n\n=== PRIOR ANALYSIS ===\n{content[:3000]}"
+
+    tk_identity = request.get("identity", "CEO / M&A")
+    tk_duration = request.get("duration", "45 minutes")
+    tk_audience = request.get("audience", "ISP Operators")
+    tk_mode = request.get("output_mode", "Generate Full TalkKit")
+    tk_leverage = request.get("include_leverage_pack", True)
+
+    identity_ctx = _get_identity_context(db, session_id)
+    persona_ctx = _get_persona_from_request(request)
+
+    identity_overlay = {
+        "CEO / M&A": "Focus on deal rationale, strategic value creation, synergy capture, and executive decision framing. Use boardroom-level language.",
+        "Operator": "Focus on operational playbooks, execution metrics, team alignment, and ground-level reality. Speak like a practitioner.",
+        "Growth Investor": "Focus on growth vectors, TAM expansion, unit economics, and scalable moats. Use investor-grade framing with data hooks.",
+    }
+    overlay = identity_overlay.get(tk_identity, identity_overlay["CEO / M&A"])
+
+    duration_guidance = {
+        "30 minutes": "Tight and punchy. Max 8 topics. Run-of-show: 5 min opening, 18 min core, 5 min Q&A, 2 min close. Audience moment at minute 15.",
+        "45 minutes": "Standard keynote. 10 topics. Run-of-show: 5 min opening, 28 min core (3 acts), 8 min Q&A, 4 min close. Audience moments at minutes 15 and 30.",
+        "60 minutes": "Full executive session. 12 topics. Run-of-show: 7 min opening, 35 min core (3-4 acts), 12 min Q&A, 6 min close. Audience moments every 15 min.",
+        "90 minutes": "Deep-dive session. 12+ topics. Run-of-show: 8 min opening, 50 min core (4-5 acts), 5 min break, 15 min Q&A, 7 min close. Audience moments every 12-15 min.",
+        "150 minutes": "Half-day workshop. 12+ topics with depth. Run-of-show: 10 min opening, 55 min Act 1, 10 min break, 45 min Act 2, 10 min break, 15 min Q&A, 5 min close. Audience moments every 10-12 min.",
+    }
+    dur_guide = duration_guidance.get(tk_duration, duration_guidance["45 minutes"])
+
+    if tk_mode == "Recommend First (show recommended anchor + structure before full generation)":
+        system_prompt = f"""You are StackMind CEO TalkKit Engine — a strategic talk preparation system. {identity_ctx}
+{persona_ctx}
+Identity overlay: {overlay}
+Duration: {tk_duration}
+Duration structure guidance: {dur_guide}
+Audience: {tk_audience}
+
+Analyze the transcript/content and provide ONLY the recommended anchor and structure preview.
+
+Return valid JSON with these keys:
+- "recommended_anchor" (object with "core_thesis" string, "why_this_anchor" string explaining why this is the strongest anchor from the content, "confidence" float 0-1)
+- "recommended_structure" (object with "acts" array of objects each with "act_number" int, "title" string, "duration_minutes" int, "purpose" string, "fatigue_note" string)
+- "top_topics_preview" (array of top 5 topic strings with approximate weight percentage)
+- "audience_alignment_note" (string — how well the content maps to {tk_audience})"""
+
+        user_prompt = f"""Analyze this content and recommend the best anchor thesis and talk structure for a {tk_duration} talk to {tk_audience}.
+
+CONTENT:
+{combined_source}
+
+Return the recommendation JSON."""
+
+        result = llm_structured_call_streaming(system_prompt, user_prompt, max_tokens=2048, fast=True, use_cache=True)
+        result["mode"] = "recommend_first"
+
+        artifact = Artifact(
+            session_id=session_id,
+            module_name="ceo_talkkit",
+            params=request,
+            raw_output=result,
+        )
+        db.add(artifact)
+        db.flush()
+        ai = ArtifactItem(
+            artifact_id=artifact.id,
+            item_type="ceo_talkkit_recommendation",
+            content=result,
+            confidence=0.9,
+            citations=[],
+        )
+        db.add(ai)
+        db.commit()
+        return {"artifact_id": str(artifact.id), "result": result}
+
+    base_system = f"""You are StackMind CEO TalkKit Engine — a comprehensive strategic talk preparation system. {identity_ctx}
+{persona_ctx}
+Identity overlay: {overlay}
+Duration: {tk_duration}
+Duration structure guidance: {dur_guide}
+Audience: {tk_audience}"""
+
+    base_user = f"""Generate from this content for a {tk_duration} talk to {tk_audience}.
+
+CONTENT:
+{combined_source}
+
+Return valid JSON with ONLY the requested keys."""
+
+    prompt_part1_sys = f"""{base_system}
+
+Return valid JSON with these keys ONLY:
+
+- "emphasis_map" (object with:
+    "topics" array of 8-12 objects each with "topic" string, "weight_pct" float (must sum to ~100), "recurring_phrases" array of strings, "conviction_level" string (high/medium/low), "tone_note" string, "top_excerpt" string
+)
+
+- "recommended_anchor" (object with:
+    "core_thesis" string — one clear thesis sentence,
+    "why_this_anchor" string — reasoning,
+    "confidence" float 0-1
+)
+
+- "recommended_structure" (object with:
+    "acts" array of objects each with "act_number" int, "title" string, "duration_minutes" int, "purpose" string, "fatigue_note" string
+)
+
+- "messaging_framework" (object with:
+    "one_sentence_thesis" string,
+    "pillars" array of 3-5 objects each with "pillar_name" string, "insight" string, "tension_addressed" string, "signature_line" string, "supporting_excerpt" string
+)"""
+
+    prompt_part2_sys = f"""{base_system}
+
+Return valid JSON with these keys ONLY:
+
+- "run_of_show" (array of objects each with:
+    "timestamp" string like "00:00-05:00",
+    "segment" string,
+    "content_notes" string,
+    "speaker_energy" string (high/medium/low),
+    "audience_moment" boolean
+)
+
+- "slide_skeleton" (array of 12-18 objects each with:
+    "slide_number" int,
+    "title" string,
+    "bullets" array of max 3 strings,
+    "speaker_notes" string,
+    "is_audience_moment" boolean
+)"""
+
+    prompt_part3_sys = f"""{base_system}
+
+Return valid JSON with these keys ONLY:
+
+- "qa_authority_bank" (array of 15 objects each with:
+    "question" string,
+    "answer_20sec" string — concise 20-second answer,
+    "answer_2min" string — detailed 2-minute answer,
+    "category" string like "strategic", "operational", "financial", "skeptic"
+)"""
+
+    if tk_leverage:
+        prompt_part3_sys += """
+
+- "content_leverage_pack" (object with:
+    "linkedin_post" string — a full ready-to-paste LinkedIn post based on the talk's core thesis,
+    "hook_lines" array of 5 strings — attention-grabbing opening lines,
+    "hot_takes" array of 5 strings — bold contrarian statements from the talk,
+    "poll_questions" array of 3 strings — engaging poll questions for social media
+)"""
+
+    import concurrent.futures
+    def _call_part(sys_p, usr_p, tokens):
+        return llm_structured_call_streaming(sys_p, usr_p, max_tokens=tokens, fast=True, use_cache=True)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        f1 = executor.submit(_call_part, prompt_part1_sys, base_user, 4096)
+        f2 = executor.submit(_call_part, prompt_part2_sys, base_user, 4096)
+        f3 = executor.submit(_call_part, prompt_part3_sys, base_user, 4096)
+        r1 = f1.result(timeout=240)
+        r2 = f2.result(timeout=240)
+        r3 = f3.result(timeout=240)
+
+    result = {}
+    for partial in [r1, r2, r3]:
+        if not partial.get("error"):
+            result.update(partial)
+        else:
+            logger.warning(f"TalkKit partial call returned error: {partial.get('error')}")
+            result.update(partial)
+    result["mode"] = "full"
+
+    artifact = Artifact(
+        session_id=session_id,
+        module_name="ceo_talkkit",
+        params=request,
+        raw_output=result,
+    )
+    db.add(artifact)
+    db.flush()
+
+    sections = ["emphasis_map", "recommended_anchor", "recommended_structure",
+                 "messaging_framework", "run_of_show", "slide_skeleton",
+                 "qa_authority_bank"]
+    if tk_leverage:
+        sections.append("content_leverage_pack")
+
+    for section in sections:
+        section_data = result.get(section)
+        if section_data:
+            ai = ArtifactItem(
+                artifact_id=artifact.id,
+                item_type=f"ceo_talkkit_{section}",
+                content={section: section_data},
+                confidence=0.9,
+                citations=[],
+            )
+            db.add(ai)
+
+    approval = Approval(
+        session_id=session_id,
+        artifact_id=artifact.id,
+        status=ApprovalStatus.draft,
+    )
+    db.add(approval)
+    db.commit()
+
+    return {"artifact_id": str(artifact.id), "result": result}
 
 
 def _get_identity_context(db: DBSession, session_id: str) -> str:

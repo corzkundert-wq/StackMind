@@ -1,0 +1,276 @@
+You are Replit AI Agent. Build a production-ready MVP called “Workbench AI” (internal name) that mimics the spec below AND enhances it with Deck Builder + Content Series Engine + Video Pipeline + Approval/Publish workflow. Prioritize reliability, editable outputs, and strict JSON schemas.
+
+============================
+0) STACK / PROJECT RULES
+============================
+- Single Replit project.
+- Backend: Python + FastAPI
+- Frontend: Streamlit (MVP) with clean dark theme.
+- DB: Postgres + pgvector (preferred). If pgvector unavailable, fallback to Chroma (but keep interfaces identical so we can swap later).
+- File storage: local filesystem in Replit (MVP) + DB metadata.
+- Embeddings: OpenAI text-embedding-3-large (default) OR configurable via env var.
+- LLM: OpenAI (default) OR configurable via env var.
+- External integrations (optional toggles): Gamma (deck), HeyGen/Runway (video), Zapier/Make/n8n (webhooks). If no API keys, mock adapters but keep same interface.
+- Environment variables: OPENAI_API_KEY, DATABASE_URL, EMBEDDING_MODEL, LLM_MODEL, APP_SECRET, WEBHOOK_DEFAULT_URL (optional), GAMMA_API_KEY (optional), HEYGEN_API_KEY (optional), RUNWAY_API_KEY (optional)
+- All AI module outputs MUST be structured JSON with citations. NO freeform-only responses.
+
+============================
+1) CORE PRODUCT BEHAVIOR
+============================
+Workbench AI is NOT a chat-first app. It is click-module-first.
+Workflow (Wizard):
+A) Identity selection (required)
+B) Choose Library (required)
+C) Select files (required)
+D) Click modules to run (Summary/Signals/Claims/Evidence/Relevance/Durability/Leverage/Canon/Decision Memo/Market Trends)
+E) Vote + Pin outputs
+F) Actions Panel (Deck Builder, Content Series, Email generator, Video pipeline, Export, Webhooks)
+Pinned items persist within session and feed downstream outputs (Canon, Decision Memo, Deck/Series/Video).
+
+============================
+2) DATA MODEL (POSTGRES)
+============================
+Implement tables (with migrations or SQL init):
+- libraries: id (uuid), name, description, created_at
+- files: id (uuid), library_id, filename, display_name, uploaded_at, tags (jsonb), raw_text (text), status (enum: uploaded/extracted/chunked/embedded/failed), error (text)
+- chunks: id (uuid), file_id, chunk_index (int), text (text), metadata (jsonb), created_at
+- chunk_embeddings: chunk_id (uuid pk/fk), embedding (vector)
+- identities: id (uuid), name, definition (jsonb), created_at, is_preset (bool)
+- sessions: id (uuid), identity_id, library_id, created_at, selection_mode (text), selected_file_ids (jsonb)
+- artifacts: id (uuid), session_id, module_name, created_at, params (jsonb), raw_output (jsonb)
+- artifact_items: id (uuid), artifact_id, item_type (text), content (jsonb), confidence (float), citations (jsonb)
+- votes: id (uuid), session_id, artifact_item_id, vote (enum: useful/not/partial), note (text), created_at
+- pins: id (uuid), session_id, artifact_item_id, pinned_at
+- approvals: id (uuid), session_id, artifact_id, status (enum: draft/reviewed/approved/scheduled/posted), scheduled_for (timestamp nullable), posted_at (timestamp nullable), channel (text nullable), meta (jsonb), updated_at
+
+External trends tables:
+- external_sources: id (uuid), tier (1/2), title, publisher, url, published_date, snippet, credibility_score, created_at
+- external_clusters: id (uuid), session_id, theme, alignment_score, tier1_count, tier2_count, citations (jsonb), created_at
+
+============================
+3) CITATIONS REQUIREMENT
+============================
+Every artifact_item must include citations:
+Internal citations format:
+[{ "file_id": "...", "chunk_id": "...", "chunk_index": 12 }]
+External citations format:
+[{ "url": "...", "publisher": "...", "published_date": "...", "tier": 1 }]
+
+============================
+4) IDENTITY SYSTEM
+============================
+Identity fields (jsonb definition):
+- name
+- role_context
+- time_horizon: one of [30d, 90d, 12m, 24m, 3-5y]
+- risk_bias: [low, med, high]
+- priority_values: array of [durability, leverage, clarity, speed, compliance]
+- tone: [direct, analytical, reflective, persuasive]
+- target_audience (optional)
+Implement endpoint:
+POST /identities/parse -> takes free_text and returns structured identity json
+UI: dropdown presets + “custom identity” textarea + Parse button + editable form + Save preset.
+
+============================
+5) MODULES (CLICK TO RUN)
+============================
+Each module is an endpoint and returns artifact + items. Store in DB.
+- Summary: summary, key_themes, unusual_points, open_questions, recommended_followups
+- Signals: insight, why_it_matters, implications, confidence, citations
+- Claims: claim_text, scope_conditions, predicted_outcome, counterexample_risks, confidence, citations
+- Evidence: claim_id linkage OR claim_text, supporting_citations, quote_snippet(optional), evidence_strength
+- Relevance: relevance_to (identity/project/stakeholders/market), relevance_score 0-5, implication_action, confidence, citations
+- Durability: horizon selection, durable_principle_candidate, durability_score 0-5, what_breaks_it, conditions, validation_test, citations
+- Leverage: leverage_score 0-5, why, high_leverage_action, second_order_effects, citations
+- Canon Builder: principle_statement, why_it_matters, applies_when, not_when, operator_checklist, anti_patterns, examples, citations, tags
+- Decision Memo: situation_summary, key_variables, options (A/B/C), recommendation, risks_mitigations, citations
+- Market Trends (Public):
+  - Inputs: tier_scope (tier1/tier2/both), domain (macro/econ, industry, tech/AI, regulatory, marketing/social, geography), horizon (30/90/365)
+  - Output: trend_clusters, tier1_evidence list, tier2_evidence list, alignment_score, relevance_to_identity, implications_actions
+  - If no web access in Replit environment, implement “source adapter” stub + allow manual URL paste import.
+
+Retrieval:
+- For selected files: retrieve top-K relevant chunks via embeddings per module (K configurable).
+- Always support “use all chunks” for small files.
+
+============================
+6) VOTING / PINNING / EDITING
+============================
+UI for each artifact_item:
+- ✅ Useful, ❌ Not useful, ⚠ Partial
+- Edit item (opens JSON editor; saves revised content as a new “revision” record or updates item with audit trail)
+- Pin/Unpin
+Pinned Board (right side) shows pinned items grouped by module, persistent within session.
+
+Implement endpoints:
+POST /sessions/{id}/vote
+POST /sessions/{id}/pin
+POST /sessions/{id}/unpin
+GET  /sessions/{id}/pins
+
+============================
+7) ACTIONS PANEL (ENHANCEMENTS REQUIRED)
+============================
+Actions Panel appears after at least one module run. Some buttons enabled only when items pinned.
+
+A) Export
+- Export pinned as Markdown + JSON
+- Export Decision Memo as PDF + Markdown
+- Export Canon entry as Markdown
+(Implement PDF via reportlab or weasyprint if available; otherwise Markdown first.)
+
+B) Deck Builder (inside Actions)
+Controls:
+- Deck Goal dropdown: Pitch / Update / Decision / Trends / Training
+- Audience dropdown: CEO / Operators / Investors / Clients
+- Slide count: 5 / 10 / 15
+- Brand kit: upload logo + choose fonts/colors + disclaimer footer text
+- Narrative style: analytical / persuasive / instructional
+Output:
+- Slide-by-slide outline (JSON + Markdown)
+- Optional: Gamma adapter to generate real deck if GAMMA_API_KEY set (otherwise mock output).
+Everything must be editable (slide title/body/bullets).
+
+C) Content Series Engine (upgrade existing “Generate 6-post series”)
+Inputs:
+- Series thesis
+- Platform selection with logos: LinkedIn, Facebook, X/Twitter, Instagram, Website
+- One-time post vs Series
+Outputs:
+- Post map:
+  1 hook
+  2 proof
+  3 story
+  4 counterpoint
+  5 framework
+  6 CTA
+- For each post: text + optional image_prompt + hashtags + CTA + compliance_note(optional)
+Repurpose buttons:
+- Turn series into deck (calls Deck Builder using the series as source)
+- Turn series into 60-sec script
+- Turn series into email sequence (3–5 emails)
+
+D) Video Pipeline (buttons, not just outline)
+Buttons:
+- Generate script (60s/3min options)
+- Generate scene list + b-roll prompts
+- Generate voiceover script + SSML (optional)
+- Render video adapter (HeyGen/Runway) if keys exist, else produce “render plan”
+- Export: MP4 (if rendered) + captions SRT (always generate SRT from script timestamps)
+All outputs editable.
+
+E) Approval + Publish Workflow
+- Status per artifact/content item: Draft → Reviewed → Approved → Scheduled → Posted
+- Scheduler UI: datetime picker + channel + webhook url
+- Webhook integration: Zapier/Make/n8n (POST payload with content, metadata, citations)
+- Store events in approvals table.
+- Provide “one-click send” once Approved.
+
+============================
+8) VOICE INPUT (REQUESTED)
+============================
+Add “Voice / Audio Upload” in Actions:
+- Upload audio file -> transcribe (OpenAI Whisper if available) -> store as a File inside chosen Library + auto-chunk + embed.
+- Show transcript preview and allow edits before saving.
+
+============================
+9) FASTAPI ENDPOINTS
+============================
+Implement these endpoints (minimum):
+Library & File
+- POST /libraries
+- GET /libraries
+- POST /files/upload (library_id, file, tags optional) -> process pipeline with progress statuses
+- GET /files?library_id=...
+- GET /files/{file_id}
+
+Identity
+- GET /identities
+- POST /identities/parse
+- POST /identities
+
+Session
+- POST /sessions
+- GET /sessions/{session_id}
+
+Modules
+- POST /sessions/{id}/run/summary
+- POST /sessions/{id}/run/signals
+- POST /sessions/{id}/run/claims
+- POST /sessions/{id}/run/evidence
+- POST /sessions/{id}/run/relevance
+- POST /sessions/{id}/run/durability
+- POST /sessions/{id}/run/leverage
+- POST /sessions/{id}/run/canon
+- POST /sessions/{id}/run/decision_memo
+- POST /sessions/{id}/run/market_trends
+
+Voting & Pinning
+- POST /sessions/{id}/vote
+- POST /sessions/{id}/pin
+- POST /sessions/{id}/unpin
+- GET  /sessions/{id}/pins
+
+Actions
+- POST /sessions/{id}/export
+- POST /sessions/{id}/generate_posts
+- POST /sessions/{id}/generate_email
+- POST /sessions/{id}/deck_builder
+- POST /sessions/{id}/video_pipeline
+- POST /sessions/{id}/send_webhook
+- POST /sessions/{id}/approval/update_status
+
+============================
+10) STREAMLIT UI SCREENS
+============================
+Screen 1: Workbench
+- Left wizard: Identity selector + Library selector + File selector + Create Session
+- Main: Module bar buttons + results list (cards) with Vote/Edit/Pin
+- Right: Pinned Board
+- Bottom/Side: Actions Panel
+
+Screen 2: Libraries & Upload
+- Create library
+- Upload files with tags + progress indicator (uploading/extracting/chunking/embedding)
+- Show file list and status
+
+Screen 3: Identities
+- List presets
+- Create/edit preset identity
+
+Screen 4: Actions / Exports
+- Manage generated decks/posts/emails/videos
+- Approval workflow status board (Draft/Reviewed/Approved/Scheduled/Posted)
+
+============================
+11) RELIABILITY / ERROR HANDLING
+============================
+- Never “hang” on file processing: display step-by-step status and store failures with error message.
+- Add retries for embedding calls (bounded).
+- Validate all module outputs with Pydantic models; if validation fails, rerun with corrective prompt once.
+- Log all requests + timings.
+- Add “Diagnostics” page showing last 50 errors.
+
+============================
+12) STRICT OUTPUT SCHEMAS (Pydantic)
+============================
+Create Pydantic models for every module item type and enforce JSON.
+Use function-style prompting: system prompt includes schema and requires citations array.
+
+============================
+13) DELIVERABLES
+============================
+- Working app runnable from Replit with a single “Run” button.
+- Seed sample data: at least 2 libraries, 2 identities, 1 sample file.
+- README with setup instructions and env vars.
+- Ensure user can upload a file, create a session, run Summary/Signals, vote/pin, generate a 6-post series, generate a 10-slide deck outline, and move it through Draft→Approved→Posted (via webhook test).
+
+NOW DO THIS:
+1) Create the full repo structure.
+2) Implement DB models + migrations/init SQL.
+3) Implement FastAPI routes and service layer (retrieval, chunking, embeddings, LLM).
+4) Implement Streamlit UI screens.
+5) Add adapters for Gamma/HeyGen/Runway as optional modules with mocks.
+6) Verify end-to-end acceptance criteria above.
+
+Do NOT ask me follow-up questions unless a required API key is missing; in that case, implement mock adapters and proceed.

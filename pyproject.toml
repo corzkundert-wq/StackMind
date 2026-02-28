@@ -2,7 +2,7 @@
 name = "repl-nix-workspace"
 version = "0.1.0"
 description = "Add your description here"
-requires-python = ">=3.11,<4"
+requires-python = ">=3.11"
 dependencies = [
     "alembic>=1.18.4",
     "fastapi>=0.129.2",

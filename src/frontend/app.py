@@ -3,39 +3,7 @@ import requests
 import json
 import os
 import urllib.parse
-import hmac
 
-# ===============================
-# 🔒 DEMO PASSWORD PROTECTION
-# ===============================
-
-DEMO_PASSWORD = os.environ.get("DEMO_PASSWORD", "")
-
-def require_demo_password():
-    if not DEMO_PASSWORD:
-        st.error("DEMO_PASSWORD is not set. Add it in Render → Environment Variables.")
-        st.stop()
-
-    # already authenticated this session
-    if st.session_state.get("demo_authenticated"):
-        return
-
-    st.markdown("<h2 style='text-align:center;'>🔒 Demo Access Required</h2>", unsafe_allow_html=True)
-
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        password_input = st.text_input("Enter Password", type="password")
-        if st.button("Continue"):
-            if hmac.compare_digest(password_input, DEMO_PASSWORD):
-                st.session_state["demo_authenticated"] = True
-                st.rerun()
-            else:
-                st.error("Incorrect password.")
-
-    # stop the app until password is correct
-    st.stop()
-
-require_demo_password()
 API_URL = "http://localhost:8000"
 DOMAIN = os.environ.get("REPLIT_DEV_DOMAIN", os.environ.get("REPLIT_DOMAINS", "localhost:5000"))
 PUBLIC_URL = f"https://{DOMAIN}"
@@ -76,12 +44,12 @@ def api_get(path):
         return []
 
 
-def api_post(path, data=None, files=None):
+def api_post(path, data=None, files=None, timeout=300):
     try:
         if files:
-            r = requests.post(f"{API_URL}{path}", data=data, files=files, timeout=120)
+            r = requests.post(f"{API_URL}{path}", data=data, files=files, timeout=timeout)
         else:
-            r = requests.post(f"{API_URL}{path}", json=data, timeout=120)
+            r = requests.post(f"{API_URL}{path}", json=data, timeout=timeout)
         return r.json() if r.status_code in (200, 201) else {"error": r.text}
     except Exception as e:
         return {"error": str(e)}
@@ -92,6 +60,26 @@ def api_delete(path):
         return r.json() if r.status_code == 200 else {"error": r.text}
     except Exception as e:
         return {"error": str(e)}
+
+@st.cache_data(ttl=30)
+def cached_identities():
+    return api_get("/identities")
+
+@st.cache_data(ttl=30)
+def cached_libraries():
+    return api_get("/libraries")
+
+@st.cache_data(ttl=30)
+def cached_personas():
+    return api_get("/personas") or []
+
+@st.cache_data(ttl=15)
+def cached_files(library_id):
+    return api_get(f"/files?library_id={library_id}")
+
+@st.cache_data(ttl=10)
+def cached_session(session_id):
+    return api_get(f"/sessions/{session_id}")
 
 def _persona_payload():
     p = st.session_state.get("active_persona")
@@ -129,7 +117,7 @@ if page == "Workbench":
     with col_wizard:
         st.subheader("Session Setup")
 
-        identities = api_get("/identities")
+        identities = cached_identities()
         identity_map = {i["name"]: i["id"] for i in identities} if identities else {}
         if identity_map:
             selected_identity = st.selectbox("Choose Identity", list(identity_map.keys()))
@@ -137,7 +125,7 @@ if page == "Workbench":
             st.warning("No identities found. Create one in the Identities page.")
             selected_identity = None
 
-        libraries = api_get("/libraries")
+        libraries = cached_libraries()
         lib_map = {l["name"]: l["id"] for l in libraries} if libraries else {}
         if lib_map:
             selected_library = st.selectbox("Choose Library", list(lib_map.keys()))
@@ -145,7 +133,7 @@ if page == "Workbench":
             st.warning("No libraries found. Create one in Libraries & Upload.")
             selected_library = None
 
-        personas_list = api_get("/personas") or []
+        personas_list = cached_personas()
         persona_map = {p["name"]: p for p in personas_list} if personas_list else {}
         persona_options = ["None (no audience targeting)"] + list(persona_map.keys())
         selected_persona_name = st.selectbox("Audience Persona", persona_options, help="Who are you creating content for?")
@@ -158,7 +146,7 @@ if page == "Workbench":
         file_map = {}
         if selected_library and selected_library in lib_map:
             lib_id = lib_map[selected_library]
-            all_files = api_get(f"/files?library_id={lib_id}")
+            all_files = cached_files(lib_id)
             available_files = [f for f in all_files if f.get("status") == "embedded"]
 
             if available_files:
@@ -200,7 +188,7 @@ if page == "Workbench":
             if st.button("End Session"):
                 del st.session_state["active_session"]
                 for k in list(st.session_state.keys()):
-                    if k.startswith("last_result_") or k.startswith("post_image_") or k.startswith("ai_result_") or k.startswith("repurpose_") or k in ("show_action", "deck_result", "content_result", "email_result", "video_result", "blog_result", "consolidated_summary", "cross_doc_result", "post_scores"):
+                    if k.startswith("last_result_") or k.startswith("post_image_") or k.startswith("ai_result_") or k.startswith("repurpose_") or k in ("show_action", "deck_result", "content_result", "email_result", "video_result", "blog_result", "consolidated_summary", "cross_doc_result", "post_scores", "show_ceo_talkkit", "ceo_talkkit_result"):
                         del st.session_state[k]
                 st.rerun()
 
@@ -212,6 +200,27 @@ if page == "Workbench":
             modules = ["summary", "signals", "claims", "evidence", "relevance", "durability", "leverage", "canon", "decision_memo", "market_trends"]
             module_labels = ["Summary", "Signals", "Claims", "Evidence", "Relevance", "Durability", "Leverage", "Canon", "Decision Memo", "Market Trends"]
 
+            run_all_col, select_col = st.columns([1, 3])
+            with run_all_col:
+                if st.button("Run All Selected", type="primary", key="run_all_mods"):
+                    selected = st.session_state.get("batch_modules", modules[:6])
+                    if selected:
+                        with st.spinner(f"Running {len(selected)} modules in parallel (fast mode)..."):
+                            batch_result = api_post(f"/sessions/{session_id}/run_batch", {"modules": selected})
+                            if batch_result and "results" in batch_result:
+                                for mod_name, mod_result in batch_result["results"].items():
+                                    st.session_state[f"last_result_{mod_name}"] = mod_result
+                                failed = batch_result.get("modules_failed", [])
+                                if failed:
+                                    st.warning(f"Some modules had issues: {', '.join(failed)}")
+                                cached_session.clear()
+                                st.rerun()
+                            else:
+                                st.error(batch_result.get("detail", batch_result.get("error", "Batch run failed")))
+            with select_col:
+                st.multiselect("Select modules to run", modules, default=modules[:6], format_func=lambda m: dict(zip(modules, module_labels)).get(m, m), key="batch_modules", label_visibility="collapsed")
+
+            st.caption("Or run individual modules:")
             row1 = st.columns(5)
             row2 = st.columns(5)
             all_cols = row1 + row2
@@ -224,9 +233,10 @@ if page == "Workbench":
                                 st.error(result.get("detail", result.get("error", "Unknown error")))
                             else:
                                 st.session_state[f"last_result_{mod}"] = result
+                                cached_session.clear()
                                 st.rerun()
 
-            con_col1, con_col2, con_col3 = st.columns([1, 1, 2])
+            con_col1, con_col2, con_col3 = st.columns([1, 1, 1])
             with con_col1:
                 if st.button("Consolidate All", type="secondary", help="Run multiple modules, then consolidate into one master summary"):
                     with st.spinner("Consolidating all analysis..."):
@@ -245,6 +255,10 @@ if page == "Workbench":
                         else:
                             st.session_state["cross_doc_result"] = result
                             st.rerun()
+            with con_col3:
+                if st.button("CEO TalkKit", type="primary", help="Generate a full CEO talk preparation kit from your documents"):
+                    st.session_state["show_ceo_talkkit"] = True
+                    st.rerun()
 
             st.divider()
 
@@ -300,7 +314,237 @@ if page == "Workbench":
                             st.markdown(f"- **{a.get('angle', '')}**: {a.get('why_unique', '')} — *Format: {a.get('recommended_format', '')}*")
                 st.divider()
 
-            session_data = api_get(f"/sessions/{session_id}")
+            if st.session_state.get("show_ceo_talkkit"):
+                st.subheader("CEO TalkKit")
+                st.caption("Generates directly from your uploaded documents/transcripts. Optionally enrich with analysis module results.")
+
+                tk_col1, tk_col2 = st.columns(2)
+                with tk_col1:
+                    tk_identity = st.selectbox("Identity Overlay", ["CEO / M&A", "Operator", "Growth Investor"], key="tk_identity")
+                    tk_duration = st.selectbox("Talk Duration", ["30 minutes", "45 minutes", "60 minutes", "90 minutes", "150 minutes"], index=1, key="tk_duration")
+                with tk_col2:
+                    tk_audience = st.selectbox("Audience", ["ISP Operators", "Grant Builders", "Investors", "Mixed"], key="tk_audience")
+                    tk_mode = st.radio("Output Mode", ["Generate Full TalkKit", "Recommend First (show recommended anchor + structure before full generation)"], key="tk_mode")
+
+                tk_opt_col1, tk_opt_col2 = st.columns(2)
+                with tk_opt_col1:
+                    tk_leverage = st.toggle("Include Content Leverage Pack", value=True, key="tk_leverage")
+                with tk_opt_col2:
+                    tk_use_modules = st.toggle("Also use analysis module results (optional)", value=False, key="tk_use_modules")
+
+                tk_src_mods = []
+                if tk_use_modules:
+                    tk_session_data = cached_session(session_id)
+                    tk_artifacts = tk_session_data.get("artifacts", []) if isinstance(tk_session_data, dict) else []
+                    tk_mod_names = list(set(a.get("module_name", "") for a in tk_artifacts if a.get("module_name") not in ("content_series", "blog_series", "deck_builder", "email_sequence", "video_pipeline", "ceo_talkkit", "")))
+                    if tk_mod_names:
+                        tk_src_mods = st.multiselect("Include findings from:", tk_mod_names, default=tk_mod_names, key="tk_src_mods")
+                    else:
+                        st.caption("No analysis modules run yet. TalkKit will use your documents directly.")
+
+                tk_btn_col1, tk_btn_col2, tk_btn_col3 = st.columns([1, 1, 2])
+                with tk_btn_col1:
+                    if st.button("Generate CEO TalkKit", type="primary", key="gen_talkkit"):
+                        with st.spinner("Generating CEO TalkKit... this may take a minute..."):
+                            tk_payload = {
+                                "identity": tk_identity,
+                                "duration": tk_duration,
+                                "audience": tk_audience,
+                                "output_mode": tk_mode,
+                                "include_leverage_pack": tk_leverage,
+                                "source_modules": tk_src_mods if tk_use_modules else [],
+                                **_persona_payload(),
+                            }
+                            tk_result = api_post(f"/sessions/{session_id}/ceo_talkkit", tk_payload)
+                            if "error" in tk_result and not tk_result.get("result"):
+                                st.error(tk_result.get("error", "Generation failed"))
+                            else:
+                                st.session_state["ceo_talkkit_result"] = tk_result
+                                cached_session.clear()
+                                st.rerun()
+                with tk_btn_col2:
+                    if st.button("Create Post", key="tk_create_post"):
+                        st.session_state["show_ceo_talkkit"] = False
+                        st.session_state["show_action"] = "posts"
+                        st.rerun()
+                with tk_btn_col3:
+                    if st.button("Close TalkKit", key="close_talkkit"):
+                        st.session_state["show_ceo_talkkit"] = False
+                        st.rerun()
+
+                if "ceo_talkkit_result" in st.session_state:
+                    tkr = st.session_state["ceo_talkkit_result"]
+                    result_data = tkr.get("result", tkr)
+                    mode = result_data.get("mode", "full")
+
+                    if mode == "recommend_first":
+                        with st.expander("RECOMMENDED ANCHOR", expanded=True):
+                            anchor = result_data.get("recommended_anchor", {})
+                            if anchor:
+                                st.markdown(f"**Core Thesis:** {anchor.get('core_thesis', '')}")
+                                st.markdown(f"**Why This Anchor:** {anchor.get('why_this_anchor', '')}")
+                                st.progress(float(anchor.get("confidence", 0.8)), text=f"Confidence: {anchor.get('confidence', 0.8):.0%}")
+                        with st.expander("RECOMMENDED STRUCTURE", expanded=True):
+                            structure = result_data.get("recommended_structure", {})
+                            for act in structure.get("acts", []):
+                                st.markdown(f"**Act {act.get('act_number', '')}:** {act.get('title', '')} ({act.get('duration_minutes', '')} min)")
+                                st.caption(f"{act.get('purpose', '')} | Fatigue: {act.get('fatigue_note', '')}")
+                        preview = result_data.get("top_topics_preview", [])
+                        if preview:
+                            with st.expander("TOP TOPICS PREVIEW", expanded=True):
+                                for t in preview:
+                                    st.markdown(f"- {t}")
+                        align = result_data.get("audience_alignment_note", "")
+                        if align:
+                            st.info(f"Audience Alignment: {align}")
+                        st.caption("Run again with 'Generate Full TalkKit' mode to get the complete kit.")
+                    else:
+                        tk_tabs = ["Emphasis Map", "Anchor & Structure", "Messaging", "Run of Show", "Slides", "Q&A Bank"]
+                        if result_data.get("content_leverage_pack"):
+                            tk_tabs.append("Leverage Pack")
+                        tabs = st.tabs(tk_tabs)
+
+                        with tabs[0]:
+                            em = result_data.get("emphasis_map", {})
+                            topics = em.get("topics", [])
+                            if topics:
+                                for ti, t in enumerate(topics):
+                                    weight = t.get("weight_pct", 0)
+                                    st.markdown(f"**{t.get('topic', '')}** — {weight:.0f}%")
+                                    st.progress(min(weight / 100.0, 1.0))
+                                    st.caption(f"Conviction: {t.get('conviction_level', '')} | Tone: {t.get('tone_note', '')}")
+                                    phrases = t.get("recurring_phrases", [])
+                                    if phrases:
+                                        st.caption(f"Phrases: {', '.join(phrases)}")
+                                    excerpt = t.get("top_excerpt", "")
+                                    if excerpt:
+                                        st.markdown(f"> {excerpt}")
+                                    st.markdown("---")
+                            else:
+                                st.info("No emphasis map data.")
+
+                        with tabs[1]:
+                            anchor = result_data.get("recommended_anchor", {})
+                            if anchor:
+                                st.markdown(f"### Core Thesis")
+                                st.markdown(f"**{anchor.get('core_thesis', '')}**")
+                                st.markdown(f"*{anchor.get('why_this_anchor', '')}*")
+                                st.progress(float(anchor.get("confidence", 0.8)), text=f"Confidence: {anchor.get('confidence', 0.8):.0%}")
+                            structure = result_data.get("recommended_structure", {})
+                            acts = structure.get("acts", [])
+                            if acts:
+                                st.markdown("### Talk Structure")
+                                for act in acts:
+                                    st.markdown(f"**Act {act.get('act_number', '')}:** {act.get('title', '')} ({act.get('duration_minutes', '')} min)")
+                                    st.caption(f"{act.get('purpose', '')} | Fatigue note: {act.get('fatigue_note', '')}")
+
+                        with tabs[2]:
+                            mf = result_data.get("messaging_framework", {})
+                            if mf:
+                                st.markdown(f"### One-Sentence Thesis")
+                                st.markdown(f"**{mf.get('one_sentence_thesis', '')}**")
+                                pillars = mf.get("pillars", [])
+                                if pillars:
+                                    st.markdown("### Pillars")
+                                    for pi, p in enumerate(pillars):
+                                        st.markdown(f"**Pillar {pi+1}: {p.get('pillar_name', '')}**")
+                                        st.markdown(f"Insight: {p.get('insight', '')}")
+                                        st.markdown(f"Tension Addressed: {p.get('tension_addressed', '')}")
+                                        st.markdown(f"Signature Line: *\"{p.get('signature_line', '')}\"*")
+                                        if p.get("supporting_excerpt"):
+                                            st.markdown(f"> {p['supporting_excerpt']}")
+                                        st.markdown("---")
+
+                        with tabs[3]:
+                            ros = result_data.get("run_of_show", [])
+                            if ros:
+                                for seg in ros:
+                                    am = " [AUDIENCE MOMENT]" if seg.get("audience_moment") else ""
+                                    energy = seg.get("speaker_energy", "medium")
+                                    energy_icon = {"high": "🔴", "medium": "🟡", "low": "🟢"}.get(energy, "🟡")
+                                    st.markdown(f"**{seg.get('timestamp', '')}** — {seg.get('segment', '')}{am} {energy_icon}")
+                                    st.caption(seg.get("content_notes", ""))
+                                    st.markdown("---")
+                            else:
+                                st.info("No run-of-show data.")
+
+                        with tabs[4]:
+                            slides = result_data.get("slide_skeleton", [])
+                            if slides:
+                                for sl in slides:
+                                    am_badge = " [AUDIENCE MOMENT]" if sl.get("is_audience_moment") else ""
+                                    st.markdown(f"**Slide {sl.get('slide_number', '')}:** {sl.get('title', '')}{am_badge}")
+                                    for b in sl.get("bullets", []):
+                                        st.markdown(f"  - {b}")
+                                    if sl.get("speaker_notes"):
+                                        st.caption(f"Notes: {sl['speaker_notes']}")
+                                    st.markdown("---")
+                            else:
+                                st.info("No slide skeleton data.")
+
+                        with tabs[5]:
+                            qa = result_data.get("qa_authority_bank", [])
+                            if qa:
+                                for qi, q in enumerate(qa):
+                                    cat = q.get("category", "general")
+                                    cat_colors = {"strategic": "#2196F3", "operational": "#4CAF50", "financial": "#FF9800", "skeptic": "#f44336"}
+                                    cat_color = cat_colors.get(cat, "#888")
+                                    st.markdown(f'**Q{qi+1}:** {q.get("question", "")} <span style="color:{cat_color};font-size:0.8em;">({cat})</span>', unsafe_allow_html=True)
+                                    with st.expander(f"Answers for Q{qi+1}"):
+                                        st.markdown(f"**20-Second Answer:** {q.get('answer_20sec', '')}")
+                                        st.markdown("---")
+                                        st.markdown(f"**2-Minute Answer:** {q.get('answer_2min', '')}")
+                            else:
+                                st.info("No Q&A data.")
+
+                        if len(tabs) > 6:
+                            with tabs[6]:
+                                lp = result_data.get("content_leverage_pack", {})
+                                if lp:
+                                    st.markdown("### LinkedIn Post")
+                                    li_post = lp.get("linkedin_post", "")
+                                    st.text_area("Ready to Copy", li_post, height=200, key="tk_li_post")
+                                    hooks = lp.get("hook_lines", [])
+                                    if hooks:
+                                        st.markdown("### Hook Lines")
+                                        for h in hooks:
+                                            st.markdown(f"- {h}")
+                                    takes = lp.get("hot_takes", [])
+                                    if takes:
+                                        st.markdown("### Hot Takes")
+                                        for t in takes:
+                                            st.markdown(f"- {t}")
+                                    polls = lp.get("poll_questions", [])
+                                    if polls:
+                                        st.markdown("### Poll Questions")
+                                        for p in polls:
+                                            st.markdown(f"- {p}")
+
+                    tk_body_parts = []
+                    for section_name in ["emphasis_map", "recommended_anchor", "messaging_framework", "run_of_show", "slide_skeleton", "qa_authority_bank", "content_leverage_pack"]:
+                        val = result_data.get(section_name)
+                        if val:
+                            tk_body_parts.append(f"## {section_name.replace('_', ' ').title()}\n{json.dumps(val, indent=2)}")
+                    if tk_body_parts:
+                        tk_save_col1, tk_save_col2 = st.columns(2)
+                        with tk_save_col1:
+                            if st.button("Save to Archive", key="save_talkkit_archive"):
+                                api_post("/archive", {
+                                    "content_type": "export",
+                                    "title": f"CEO TalkKit — {tk_identity} — {tk_duration}",
+                                    "body": "\n\n".join(tk_body_parts),
+                                    "meta": {"identity": tk_identity, "duration": tk_duration, "audience": tk_audience},
+                                    "folder": "CEO TalkKit",
+                                    "session_id": str(session_id),
+                                })
+                                st.success("CEO TalkKit saved to Archive!")
+                        with tk_save_col2:
+                            tk_export = json.dumps(result_data, indent=2)
+                            st.download_button("Download JSON", tk_export, file_name="ceo_talkkit.json", mime="application/json", key="dl_talkkit")
+
+                st.divider()
+
+            session_data = cached_session(session_id)
             artifacts = session_data.get("artifacts", []) if isinstance(session_data, dict) else []
 
             has_results = False
@@ -383,7 +627,7 @@ if page == "Workbench":
             if st.session_state.get("show_action") == "posts":
                 st.subheader("Social Media Posts")
 
-                session_data_for_mods = api_get(f"/sessions/{session_id}")
+                session_data_for_mods = cached_session(session_id)
                 completed_artifacts = session_data_for_mods.get("artifacts", []) if isinstance(session_data_for_mods, dict) else []
                 completed_module_names = list(set(a.get("module_name", "") for a in completed_artifacts if a.get("module_name") not in ("content_series", "blog_series", "deck_builder", "email_sequence", "video_pipeline", "")))
 
@@ -536,9 +780,11 @@ if page == "Workbench":
                                     if cal_r and cal_r.get("id"):
                                         success_count += 1
                                 if success_count == len(posts):
-                                    st.success(f"All {len(posts)} posts scheduled! First: {series_start}, Last: {series_start + td_delta(days=(len(posts)-1)*series_gap)}. View in Content Calendar.")
+                                    st.success(f"All {len(posts)} posts scheduled! View in Content Calendar.")
+                                    st.rerun()
                                 elif success_count > 0:
                                     st.warning(f"Scheduled {success_count}/{len(posts)} posts.")
+                                    st.rerun()
                                 else:
                                     st.error("Scheduling failed. Try again.")
 
@@ -702,11 +948,17 @@ X / Twitter</a>''', unsafe_allow_html=True)
                         with action_cols[4]:
                             if st.button("Schedule", key=f"cal_{pnum}", help="Add this post to your Content Calendar"):
                                 sched_d = st.session_state.get(f"sched_date_{pnum}")
+                                import re as _re
+                                raw_time = p.get("best_time_to_post", "") or ""
+                                time_match = _re.search(r'\d{1,2}:\d{2}', raw_time)
+                                sched_time = time_match.group(0) if time_match else "09:00"
+                                if len(sched_time) == 4:
+                                    sched_time = "0" + sched_time
                                 cal_res = api_post("/calendar", {
                                     "title": series_label,
                                     "content_type": "post",
                                     "scheduled_date": str(sched_d) if sched_d else "",
-                                    "scheduled_time": p.get("best_time_to_post", "09:00")[:5] if p.get("best_time_to_post") else "09:00",
+                                    "scheduled_time": sched_time,
                                     "platform": p.get("platform", "LinkedIn"),
                                     "content_preview": full_text[:200],
                                     "color": color_tag,
@@ -715,7 +967,8 @@ X / Twitter</a>''', unsafe_allow_html=True)
                                     "meta": {"post_index": pi, "post_number": pnum, "series_total": len(posts)},
                                 })
                                 if cal_res and cal_res.get("id"):
-                                    st.success(f"Scheduled for {sched_d}!")
+                                    st.success(f"Scheduled for {sched_d}! View in Content Calendar.")
+                                    st.rerun()
                                 else:
                                     st.warning("Failed to schedule.")
 
@@ -763,7 +1016,7 @@ X / Twitter</a>''', unsafe_allow_html=True)
             elif st.session_state.get("show_action") == "blog":
                 st.subheader("Blog Series")
 
-                session_data_blog = api_get(f"/sessions/{session_id}")
+                session_data_blog = cached_session(session_id)
                 blog_artifacts = session_data_blog.get("artifacts", []) if isinstance(session_data_blog, dict) else []
                 blog_mod_names = list(set(a.get("module_name", "") for a in blog_artifacts if a.get("module_name") not in ("content_series", "blog_series", "deck_builder", "email_sequence", "video_pipeline", "")))
 
@@ -864,7 +1117,7 @@ X / Twitter</a>''', unsafe_allow_html=True)
             elif st.session_state.get("show_action") == "deck":
                 st.subheader("Deck Builder")
 
-                session_data_deck = api_get(f"/sessions/{session_id}")
+                session_data_deck = cached_session(session_id)
                 deck_artifacts = session_data_deck.get("artifacts", []) if isinstance(session_data_deck, dict) else []
                 deck_mod_names = list(set(a.get("module_name", "") for a in deck_artifacts if a.get("module_name") not in ("content_series", "blog_series", "deck_builder", "email_sequence", "video_pipeline", "")))
 
@@ -965,7 +1218,7 @@ X / Twitter</a>''', unsafe_allow_html=True)
             elif st.session_state.get("show_action") == "email":
                 st.subheader("Email Sequence")
 
-                session_data_email = api_get(f"/sessions/{session_id}")
+                session_data_email = cached_session(session_id)
                 email_artifacts = session_data_email.get("artifacts", []) if isinstance(session_data_email, dict) else []
                 email_mod_names = list(set(a.get("module_name", "") for a in email_artifacts if a.get("module_name") not in ("content_series", "blog_series", "deck_builder", "email_sequence", "video_pipeline", "")))
 
@@ -1011,7 +1264,7 @@ X / Twitter</a>''', unsafe_allow_html=True)
             elif st.session_state.get("show_action") == "video":
                 st.subheader("Video Pipeline")
 
-                session_data_vid = api_get(f"/sessions/{session_id}")
+                session_data_vid = cached_session(session_id)
                 vid_artifacts = session_data_vid.get("artifacts", []) if isinstance(session_data_vid, dict) else []
                 vid_mod_names = list(set(a.get("module_name", "") for a in vid_artifacts if a.get("module_name") not in ("content_series", "blog_series", "deck_builder", "email_sequence", "video_pipeline", "")))
 
@@ -1105,7 +1358,7 @@ X / Twitter</a>''', unsafe_allow_html=True)
             # === WEBHOOK ===
             elif st.session_state.get("show_action") == "webhook":
                 st.subheader("Send Webhook")
-                sd = api_get(f"/sessions/{session_id}")
+                sd = cached_session(session_id)
                 art_list = sd.get("artifacts", []) if isinstance(sd, dict) else []
                 art_opts = {f"{a['module_name']} ({a['id'][:8]})": a["id"] for a in art_list}
                 sel_art = st.selectbox("Select Artifact", list(art_opts.keys()) if art_opts else ["No artifacts"])
@@ -1147,7 +1400,7 @@ X / Twitter</a>''', unsafe_allow_html=True)
 
             st.divider()
             st.subheader("Approval Status")
-            sd_ap = api_get(f"/sessions/{st.session_state['active_session']}")
+            sd_ap = cached_session(st.session_state['active_session'])
             if isinstance(sd_ap, dict):
                 for art in sd_ap.get("artifacts", []):
                     st.caption(f"{art['module_name']}")
@@ -1172,6 +1425,7 @@ elif page == "Libraries & Upload":
                 if lib_name:
                     result = api_post("/libraries", {"name": lib_name, "description": lib_desc})
                     if "id" in result:
+                        cached_libraries.clear()
                         st.success(f"Library '{lib_name}' created!")
                         st.rerun()
 
@@ -1249,7 +1503,7 @@ elif page == "Libraries & Upload":
         for lib in libraries:
             with st.expander(f"{lib['name']}", expanded=True):
                 st.caption(lib.get("description", ""))
-                files = api_get(f"/files?library_id={lib['id']}")
+                files = cached_files(lib['id'])
                 if files:
                     for f in files:
                         icons = {"embedded": "✅", "failed": "❌", "chunked": "🔄", "extracted": "📄", "uploaded": "⏳"}
@@ -1310,7 +1564,7 @@ elif page == "Identities":
 
     with col2:
         st.subheader("Existing Identities")
-        identities = api_get("/identities")
+        identities = cached_identities()
         for i in identities:
             badge = " (Preset)" if i.get("is_preset") else ""
             with st.expander(f"{i['name']}{badge}"):
@@ -1355,7 +1609,7 @@ elif page == "Audience Personas":
             else:
                 st.warning("Name is required.")
 
-    personas = api_get("/personas")
+    personas = cached_personas()
     if personas:
         for per in personas:
             with st.container():

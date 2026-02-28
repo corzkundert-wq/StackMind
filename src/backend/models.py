@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Text, Float, Integer, Boolean, DateTime, ForeignKey, Enum as SAEnum
+from sqlalchemy import Column, String, Text, Float, Integer, Boolean, DateTime, ForeignKey, Enum as SAEnum, Index
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 from src.backend.database import Base
@@ -36,7 +36,7 @@ class Library(Base):
 class File(Base):
     __tablename__ = "files"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    library_id = Column(UUID(as_uuid=True), ForeignKey("libraries.id"), nullable=False)
+    library_id = Column(UUID(as_uuid=True), ForeignKey("libraries.id"), nullable=False, index=True)
     filename = Column(String(500), nullable=False)
     display_name = Column(String(500))
     uploaded_at = Column(DateTime, default=datetime.utcnow)
@@ -50,7 +50,7 @@ class File(Base):
 class Chunk(Base):
     __tablename__ = "chunks"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    file_id = Column(UUID(as_uuid=True), ForeignKey("files.id"), nullable=False)
+    file_id = Column(UUID(as_uuid=True), ForeignKey("files.id"), nullable=False, index=True)
     chunk_index = Column(Integer, nullable=False)
     text = Column(Text, nullable=False)
     chunk_metadata = Column("metadata", JSONB, default=dict)
@@ -68,8 +68,8 @@ class Identity(Base):
 class Session(Base):
     __tablename__ = "sessions"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    identity_id = Column(UUID(as_uuid=True), ForeignKey("identities.id"), nullable=False)
-    library_id = Column(UUID(as_uuid=True), ForeignKey("libraries.id"), nullable=False)
+    identity_id = Column(UUID(as_uuid=True), ForeignKey("identities.id"), nullable=False, index=True)
+    library_id = Column(UUID(as_uuid=True), ForeignKey("libraries.id"), nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     selection_mode = Column(Text, default="selected")
     selected_file_ids = Column(JSONB, default=list)
@@ -82,8 +82,8 @@ class Session(Base):
 class Artifact(Base):
     __tablename__ = "artifacts"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
-    module_name = Column(String(100), nullable=False)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False, index=True)
+    module_name = Column(String(100), nullable=False, index=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     params = Column(JSONB, default=dict)
     raw_output = Column(JSONB, default=dict)
@@ -93,8 +93,8 @@ class Artifact(Base):
 class ArtifactItem(Base):
     __tablename__ = "artifact_items"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    artifact_id = Column(UUID(as_uuid=True), ForeignKey("artifacts.id"), nullable=False)
-    item_type = Column(String(100), nullable=False)
+    artifact_id = Column(UUID(as_uuid=True), ForeignKey("artifacts.id"), nullable=False, index=True)
+    item_type = Column(String(100), nullable=False, index=True)
     content = Column(JSONB, nullable=False)
     confidence = Column(Float, default=0.0)
     citations = Column(JSONB, default=list)
@@ -103,8 +103,8 @@ class ArtifactItem(Base):
 class Vote(Base):
     __tablename__ = "votes"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
-    artifact_item_id = Column(UUID(as_uuid=True), ForeignKey("artifact_items.id"), nullable=False)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False, index=True)
+    artifact_item_id = Column(UUID(as_uuid=True), ForeignKey("artifact_items.id"), nullable=False, index=True)
     vote = Column(SAEnum(VoteType), nullable=False)
     note = Column(Text, default="")
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -113,8 +113,8 @@ class Vote(Base):
 class Pin(Base):
     __tablename__ = "pins"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
-    artifact_item_id = Column(UUID(as_uuid=True), ForeignKey("artifact_items.id"), nullable=False)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False, index=True)
+    artifact_item_id = Column(UUID(as_uuid=True), ForeignKey("artifact_items.id"), nullable=False, index=True)
     pinned_at = Column(DateTime, default=datetime.utcnow)
     session = relationship("Session", back_populates="pins")
     artifact_item = relationship("ArtifactItem")
@@ -122,8 +122,8 @@ class Pin(Base):
 class Approval(Base):
     __tablename__ = "approvals"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False)
-    artifact_id = Column(UUID(as_uuid=True), ForeignKey("artifacts.id"), nullable=False)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=False, index=True)
+    artifact_id = Column(UUID(as_uuid=True), ForeignKey("artifacts.id"), nullable=False, index=True)
     status = Column(SAEnum(ApprovalStatus), default=ApprovalStatus.draft)
     scheduled_for = Column(DateTime, nullable=True)
     posted_at = Column(DateTime, nullable=True)
@@ -178,8 +178,8 @@ class ContentType(str, enum.Enum):
 class SavedContent(Base):
     __tablename__ = "saved_content"
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=True)
-    content_type = Column(SAEnum(ContentType), nullable=False)
+    session_id = Column(UUID(as_uuid=True), ForeignKey("sessions.id"), nullable=True, index=True)
+    content_type = Column(SAEnum(ContentType), nullable=False, index=True)
     title = Column(String(500), nullable=False, default="Untitled")
     body = Column(Text, default="")
     meta = Column(JSONB, default=dict)

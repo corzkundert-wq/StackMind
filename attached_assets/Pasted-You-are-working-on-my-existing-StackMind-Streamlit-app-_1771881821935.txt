@@ -1,0 +1,90 @@
+You are working on my existing StackMind Streamlit app. I already have an “Analysis Modules” page with buttons:
+Summary, Signals, Claims, Evidence, Relevance, Durability, Leverage, Canon, Decision Memo, Market Trends, Consolidate All, Cross-Doc Insights.
+
+TASK: Add a NEW module called “CEO TalkKit” with a special extra layer, while preserving all existing features/modules exactly as-is.
+
+NON-NEGOTIABLES
+1) Do NOT rename, remove, reorder, or change behavior of existing modules.
+2) CEO TalkKit must be additive only.
+3) Reuse existing library/file selection + artifact save/view patterns already used by other modules.
+4) CEO TalkKit must include the same “Create Post” option that other modules have, plus its own extra outputs.
+
+UI / NAV
+- Add a new button labeled “CEO TalkKit” inside the Analysis Modules grid.
+- When clicked, route to a new view/page/section for CEO TalkKit (follow the same routing pattern used by other modules).
+
+CEO TALK KIT INPUTS (in the CEO TalkKit page)
+- Library selector (existing)
+- Multi-file selector within the library (existing)
+- Identity dropdown:
+  - CEO / M&A
+  - Operator
+  - Growth Investor
+- Talk duration dropdown:
+  - 30 minutes
+  - 45 minutes
+  - 60 minutes
+  - 90 minutes
+  - 150 minutes (2.5 hours)
+- Audience dropdown (default “ISP Operators”):
+  - ISP Operators
+  - Grant Builders
+  - Investors
+  - Mixed
+- Output Mode radio:
+  - “Recommend First (show recommended anchor + structure before full generation)”
+  - “Generate Full TalkKit”
+- Toggle: “Include Content Leverage Pack” (default ON)
+- Button: “Generate CEO TalkKit”
+- Button: “Create Post” (same behavior and style as other modules)
+
+CEO TALK KIT OUTPUTS (tabs or sections)
+1) Emphasis Map (Topic Weighting)
+   - Top 8–12 topics
+   - % distribution (must sum to ~100%)
+   - recurring phrases
+   - conviction / tone notes
+   - top supporting excerpts
+2) Recommended Core Anchor + Recommended Structure
+   - A recommended “core thesis” / anchor topic based on transcript emphasis + identity + duration
+   - A recommended run-of-show structure based on duration (fatigue-aware)
+3) Core Thesis + Messaging Framework
+   - one sentence thesis
+   - 3–5 pillars
+   - each pillar includes: insight, tension addressed, signature line, supporting excerpt
+4) Timestamped Run of Show
+5) Slide Skeleton (Core Block only)
+   - 12–18 slides
+   - title, max 3 bullets, speaker notes
+   - include “Audience Moment” prompts every ~10 minutes
+6) Q&A Authority Bank
+   - top 15 likely questions
+   - 20-second answer + 2-minute answer
+7) Content Leverage Pack (if toggle ON)
+   - 1 LinkedIn post
+   - 5 hook lines
+   - 5 hot takes
+   - 3 poll questions
+8) Create Post output (must exist like other modules)
+   - When user clicks “Create Post”, generate social post(s) from the CEO TalkKit outputs using the same workflow as other modules.
+
+BACKEND / IMPLEMENTATION
+- Add a dedicated function (or endpoint if your app uses FastAPI) named something like:
+  generate_ceo_talkkit(text, identity, duration, audience, include_leverage_pack) -> dict
+- It must:
+  A) normalize + merge selected files
+  B) topic extraction + clustering + weighting
+  C) identity overlay (CEO/M&A vs Operator vs Investor)
+  D) duration-based structure recommendation
+  E) generate outputs 1–7 above
+
+ARTIFACT STORAGE
+- Save results as a new artifact type, e.g., “ceo_talkkit”.
+- Store artifacts linked to the selected library/files, consistent with existing artifact storage.
+- Add “Copy” buttons and “Save Artifact” behavior consistent with other modules.
+
+ACCEPTANCE CRITERIA
+- A new “CEO TalkKit” button appears on the Analysis Modules page.
+- Existing modules remain unchanged and still work.
+- CEO TalkKit generates all outputs reliably from selected transcript dumps.
+- CEO TalkKit includes a working “Create Post” option (same as other modules), plus its additional layers.
